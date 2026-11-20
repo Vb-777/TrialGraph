@@ -1,0 +1,154 @@
+# The data contract. Every gold table and every gold column is documented here;
+# a quality check fails the build if a gold column exists without a description,
+# because an undocumented column is one an analyst or an agent will guess at.
+#
+# pii: true marks personal data. The lineage check fails the build if any gold
+# column's value descends from a PII column, at any distance.
+
+owner_default: dsai-data-engineering
+
+tables:
+  # ------------------------------------------------------------- staging
+  staging.stg_contacts:
+    description: Central contacts listed on each trial. Personal data; stops at staging.
+    tags: [pii]
+    columns:
+      contact_name: {description: Contact person's name, pii: true}
+      contact_email: {description: Contact email address, pii: true}
+      contact_phone: {description: Contact phone number, pii: true}
+      contact_role: {description: Registry role of the contact, e.g. CONTACT}
+      ordinal: {description: Position of the contact in the registry record}
+
+  # -------------------------------------------------------------- silver
+  silver.trial:
+    description: One row per trial at its latest registry version, typed and conformed.
+    grain: nct_id
+  silver.map_sponsor:
+    description: Raw sponsor spelling to resolved sponsor entity, with registry-stated parent.
+    grain: sponsor_name_raw
+  silver.map_intervention:
+    description: Raw intervention name to resolved product entity.
+    grain: intervention_name_raw
+  silver.intervention_alias:
+    description: Every known name for every product, with how far it can be trusted.
+    grain: alias_key
+  silver.trial_contact_flag:
+    description: Whether a trial publishes a central contact - derived from row existence only.
+    grain: nct_id
+
+  # ---------------------------------------------------------------- gold
+  gold.fct_trial:
+    description: The trial fact. One row per trial; every governed metric is defined at this grain.
+    grain: nct_id
+    columns:
+      nct_id: {description: ClinicalTrials.gov identifier, NCT followed by 8 digits}
+      brief_title: {description: Short public title of the trial}
+      overall_status: {description: Registry recruitment status; UNRECOGNISED if outside the registry's code list}
+      status_group: {description: "ongoing | completed | stopped | unknown - status collapsed for analysis"}
+      why_stopped: {description: Free-text reason given for terminating, withdrawing or suspending}
+      phase_label: {description: "Phase, keeping combinations such as PHASE2/PHASE3; NA for non-drug trials"}
+      phase_rank: {description: "Highest phase reached, 0 = early phase 1 to 4 = phase 4; null if not applicable"}
+      start_date: {description: Start date; month-only registry dates are set to the 1st - see start_date_precision}
+      start_date_precision: {description: "day | month - how precise start_date really is"}
+      start_year: {description: Calendar year of start_date}
+      primary_completion_date: {description: Primary completion date, actual or anticipated}
+      enrollment_actual: {description: Participants actually enrolled; null unless the registry marks the count ACTUAL}
+      enrollment_planned: {description: Anticipated enrollment; null unless the registry marks the count ESTIMATED}
+      enrollment_type: {description: "ACTUAL | ESTIMATED - which of the two columns above is populated"}
+      has_results: {description: Whether results are posted on the registry}
+      allocation: {description: "RANDOMIZED | NON_RANDOMIZED | NA"}
+      lead_sponsor_key: {description: Resolved lead sponsor; joins gold.dim_sponsor}
+      has_central_contact: {description: "Whether a central contact is published. Derived from whether a contact row exists, never from contact values - deliberately has no source path, which is what keeps it clear of the PII lineage check."}
+      last_update_posted: {description: Date the registry record was last updated}
+
+  gold.dim_sponsor:
+    description: One row per resolved sponsor entity.
+    grain: sponsor_key
+    columns:
+      sponsor_key: {description: Normalised sponsor key}
+      sponsor_name: {description: Display name - the most frequent registered spelling}
+      sponsor_class: {description: "INDUSTRY | NIH | FED | OTHER_GOV | NETWORK | INDIV | OTHER"}
+      raw_name_variants: {description: Number of distinct registered spellings folded into this sponsor}
+      parent_sponsor_key: {description: Parent company where the registry itself states one; else null}
+      parent_sponsor_name: {description: Parent company display name}
+      group_sponsor_key: {description: Parent if stated, otherwise the sponsor itself - the roll-up level}
+      group_sponsor_name: {description: Display name at the roll-up level}
+
+  gold.dim_condition:
+    description: One row per MeSH descriptor any trial maps to.
+    grain: mesh_id
+    columns:
+      mesh_id: {description: MeSH descriptor ID as supplied by the registry}
+      mesh_term: {description: MeSH preferred term}
+      trials_direct: {description: Trials whose conditions map to this descriptor directly}
+      trials_direct_or_descendant: {description: Trials mapping to this descriptor or any descriptor beneath it}
+
+  gold.dim_intervention:
+    description: One row per resolved product or intervention.
+    grain: intervention_key
+    columns:
+      intervention_key: {description: Resolved product key}
+      intervention_name: {description: Display name}
+      intervention_type: {description: "DRUG | BIOLOGICAL | DEVICE | PROCEDURE | BEHAVIORAL | ..."}
+      synonym_count: {description: Number of names resolved to this product}
+      is_placebo: {description: Whether this entity is a placebo}
+
+  gold.brg_trial_condition:
+    description: Trial to MeSH descriptor. Many-to-many - aggregate through it with COUNT DISTINCT.
+    grain: nct_id, mesh_id
+    columns:
+      nct_id: {description: Trial}
+      mesh_id: {description: MeSH descriptor}
+      relation: {description: "direct | ancestor - how the descriptor relates to the trial's conditions"}
+  gold.brg_trial_condition_text:
+    description: Trial to condition as registered in free text. Complements the MeSH bridge, which misses trials the registry never mapped.
+    grain: nct_id, condition_text
+    columns:
+      nct_id: {description: Trial}
+      condition_text: {description: Condition exactly as the sponsor registered it}
+      condition_text_lower: {description: Lower-cased condition text for case-insensitive matching}
+  gold.brg_trial_intervention:
+    description: Trial to resolved intervention.
+    grain: nct_id, intervention_key
+    columns:
+      nct_id: {description: Trial}
+      intervention_key: {description: Resolved intervention}
+      is_placebo: {description: Whether this arm's intervention is a placebo}
+  gold.brg_trial_sponsor:
+    description: Trial to resolved sponsor, lead and collaborators.
+    grain: nct_id, sponsor_key, role
+    columns:
+      nct_id: {description: Trial}
+      sponsor_key: {description: Resolved sponsor}
+      role: {description: "lead | collaborator"}
+  gold.brg_trial_country:
+    description: Trial to country with at least one site.
+    grain: nct_id, country
+    columns:
+      nct_id: {description: Trial}
+      country: {description: Country name as registered}
+
+  gold.rag_chunks:
+    description: Retrieval chunks of each trial's summary and eligibility text.
+    grain: chunk_id
+    columns:
+      chunk_id: {description: "nct_id#section#ordinal - stable citation handle"}
+      nct_id: {description: Trial the chunk came from}
+      section: {description: "brief_summary | eligibility_criteria"}
+      chunk_ord: {description: Position of the chunk within its section}
+      chunk_text: {description: Chunk text, up to 120 words, 20-word overlap}
+      n_words: {description: Words in the chunk}
+  gold.rag_chunks_enriched:
+    description: Chunks with governed trial attributes attached for filtered retrieval.
+    grain: chunk_id
+    columns:
+      chunk_id: {description: Citation handle}
+      nct_id: {description: Trial}
+      section: {description: Section of the record}
+      chunk_ord: {description: Position within the section}
+      chunk_text: {description: Chunk text}
+      overall_status: {description: Trial status, from gold.fct_trial}
+      status_group: {description: Collapsed status, from gold.fct_trial}
+      phase_label: {description: Phase, from gold.fct_trial}
+      start_year: {description: Start year, from gold.fct_trial}
+      lead_sponsor_name: {description: Lead sponsor display name}

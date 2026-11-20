@@ -1,0 +1,38 @@
+# Entity-resolution overrides. Rules in resolve.py handle the general case;
+# this file only records what the rules cannot know. Every entry should be
+# something a person checked, because an override is trusted absolutely.
+
+# sponsor key -> canonical sponsor key (after rule-based normalisation)
+sponsor_keys: {}
+
+# Parent text as written after "subsidiary of" (prefix, case-insensitive) ->
+# canonical sponsor key. Only for parents a string match would get wrong.
+sponsor_parents:
+  # Merck & Co., Inc. of Rahway, New Jersey is MSD, registered here as
+  # "Merck Sharp & Dohme LLC". It is a different company from Merck KGaA of
+  # Darmstadt, which a prefix match on "merck" would wrongly pick.
+  "Merck & Co": merck sharp and dohme
+
+# canonical sponsor key -> preferred display name
+sponsor_display:
+  novartis: Novartis
+
+# Phrases that appear as an intervention "other name" but identify no product.
+# Linking on them would fuse unrelated interventions into one entity.
+stop_other_names:
+  - standard of care
+  - standard care
+  - usual care
+  - control
+  - sham
+  - no intervention
+  - best medical therapy
+  - optimal medical therapy
+  - guideline-directed medical therapy
+  - gdmt
+  - routine care
+
+# normalised name -> preferred display name for its synonym group
+intervention_display:
+  lcz696: Sacubitril/Valsartan
+  sacubitril/valsartan: Sacubitril/Valsartan

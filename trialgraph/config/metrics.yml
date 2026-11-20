@@ -1,0 +1,84 @@
+# Governed metrics. A metric is defined once, here, and every consumer - a
+# dashboard, a notebook, an agent - gets the same number for the same question.
+# Definitions that involve a choice say what the choice was.
+
+joins:
+  lead_sponsor: "LEFT JOIN gold.dim_sponsor s ON s.sponsor_key = f.lead_sponsor_key"
+
+dimensions:
+  # trial grain: one value per trial
+  phase:          {sql: f.phase_label,          grain: trial}
+  status:         {sql: f.overall_status,       grain: trial}
+  status_group:   {sql: f.status_group,         grain: trial}
+  start_year:     {sql: f.start_year,           grain: trial}
+  has_results:    {sql: f.has_results,          grain: trial}
+  lead_sponsor:   {sql: s.sponsor_name,         grain: trial, join: lead_sponsor}
+  sponsor_group:  {sql: s.group_sponsor_name,   grain: trial, join: lead_sponsor}
+  sponsor_class:  {sql: s.sponsor_class,        grain: trial, join: lead_sponsor}
+  # fan-out: a trial can have many values. Grouping counts a trial once per
+  # value; filtering keeps a trial once however many of its values match.
+  condition:
+    grain: fanout
+    sql: dc.mesh_term
+    from: "gold.brg_trial_condition bc JOIN gold.dim_condition dc ON dc.mesh_id = bc.mesh_id"
+    key: bc.nct_id
+    description: MeSH descriptor, including trials mapped to any narrower descriptor
+  condition_direct:
+    grain: fanout
+    sql: dc.mesh_term
+    from: "gold.brg_trial_condition bc JOIN gold.dim_condition dc ON dc.mesh_id = bc.mesh_id"
+    where: "bc.relation = 'direct'"
+    key: bc.nct_id
+    description: MeSH descriptor the trial's conditions map to directly
+  condition_text:
+    grain: fanout
+    sql: bct.condition_text
+    from: gold.brg_trial_condition_text bct
+    key: bct.nct_id
+    description: Condition exactly as registered; catches trials the registry never mapped to MeSH
+  country:
+    grain: fanout
+    sql: bco.country
+    from: gold.brg_trial_country bco
+    key: bco.nct_id
+  intervention:
+    grain: fanout
+    sql: di.intervention_name
+    from: "gold.brg_trial_intervention bi JOIN gold.dim_intervention di ON di.intervention_key = bi.intervention_key"
+    key: bi.nct_id
+
+metrics:
+  trials:
+    type: count_distinct
+    expr: f.nct_id
+    description: Number of trials.
+  actual_enrollment:
+    type: sum
+    expr: f.enrollment_actual
+    description: >
+      Participants actually enrolled. Only counts the registry marks ACTUAL;
+      planned enrollment is a separate metric and the two are never added.
+      Heavily skewed: population-scale pragmatic trials enrol millions, so a
+      single trial can dominate a total. Report median_actual_enrollment beside it.
+  planned_enrollment:
+    type: sum
+    expr: f.enrollment_planned
+    description: Anticipated enrollment of trials not yet reporting an actual count.
+  median_actual_enrollment:
+    type: median
+    expr: f.enrollment_actual
+    description: Median actual enrollment per trial.
+  termination_rate:
+    type: ratio
+    numerator: "f.overall_status = 'TERMINATED'"
+    denominator: "f.overall_status IN ('COMPLETED', 'TERMINATED')"
+    description: >
+      Terminated / (completed + terminated). Trials that never ended
+      (ongoing, unknown) and trials withdrawn before enrolling anyone are
+      excluded from the denominator: neither can be said to have run to an
+      end or been cut short.
+  results_reporting_rate:
+    type: ratio
+    numerator: "f.overall_status = 'COMPLETED' AND f.has_results"
+    denominator: "f.overall_status = 'COMPLETED'"
+    description: Share of completed trials with results posted on the registry.

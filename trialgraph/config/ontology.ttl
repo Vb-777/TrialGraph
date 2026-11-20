@@ -1,0 +1,55 @@
+@prefix tg:   <https://github.com/Vb-777/TrialGraph/ontology#> .
+@prefix owl:  <http://www.w3.org/2002/07/owl#> .
+@prefix rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd:  <http://www.w3.org/2001/XMLSchema#> .
+
+<https://github.com/Vb-777/TrialGraph/ontology> a owl:Ontology ;
+    rdfs:label "TrialGraph clinical-trials ontology" ;
+    rdfs:comment """A small ontology for interventional trial registry data.
+Conditions are not minted here: they are MeSH descriptors, identified by the
+National Library of Medicine's own linked-data IRIs, so the graph joins the
+standard rather than inventing a parallel one.""" .
+
+# ------------------------------------------------------------------ classes
+tg:ClinicalTrial  a owl:Class ; rdfs:label "Clinical trial" ;
+    rdfs:comment "An interventional study registered on ClinicalTrials.gov." .
+tg:Condition      a owl:Class ; rdfs:subClassOf skos:Concept ; rdfs:label "Condition" ;
+    rdfs:comment "A MeSH descriptor a trial studies, directly or as a broader area." .
+tg:Intervention   a owl:Class ; rdfs:label "Intervention" ;
+    rdfs:comment "A resolved product or intervention - all of its names are one entity." .
+tg:Organization   a owl:Class ; rdfs:label "Organization" ;
+    rdfs:comment "A resolved sponsor or collaborator." .
+tg:Phase          a owl:Class ; rdfs:label "Trial phase" .
+tg:Status         a owl:Class ; rdfs:label "Recruitment status" .
+tg:Country        a owl:Class ; rdfs:label "Country" .
+
+# -------------------------------------------------------- object properties
+# withinConditionArea is the broad relation; studiesCondition the specific one.
+# Declaring studiesCondition a subproperty means any reasoner, or a SPARQL
+# property path, gets "trials in the heart-failure area" without the query
+# having to know that direct mappings exist as a separate case.
+tg:withinConditionArea a owl:ObjectProperty ; rdfs:domain tg:ClinicalTrial ; rdfs:range tg:Condition ;
+    rdfs:comment "The trial studies this condition or a narrower one beneath it in MeSH." .
+tg:studiesCondition    a owl:ObjectProperty ; rdfs:subPropertyOf tg:withinConditionArea ;
+    rdfs:domain tg:ClinicalTrial ; rdfs:range tg:Condition ;
+    rdfs:comment "The trial's conditions map to this descriptor directly." .
+tg:evaluatesIntervention a owl:ObjectProperty ; rdfs:domain tg:ClinicalTrial ; rdfs:range tg:Intervention .
+tg:hasSponsor          a owl:ObjectProperty ; rdfs:domain tg:ClinicalTrial ; rdfs:range tg:Organization .
+tg:hasLeadSponsor      a owl:ObjectProperty, owl:FunctionalProperty ; rdfs:subPropertyOf tg:hasSponsor .
+tg:hasCollaborator     a owl:ObjectProperty ; rdfs:subPropertyOf tg:hasSponsor .
+tg:subsidiaryOf        a owl:ObjectProperty ; rdfs:domain tg:Organization ; rdfs:range tg:Organization ;
+    rdfs:comment "Asserted only where the registry itself states the relationship." .
+tg:inPhase             a owl:ObjectProperty, owl:FunctionalProperty ; rdfs:range tg:Phase .
+tg:hasStatus           a owl:ObjectProperty, owl:FunctionalProperty ; rdfs:range tg:Status .
+tg:conductedIn         a owl:ObjectProperty ; rdfs:range tg:Country .
+
+# ------------------------------------------------------ datatype properties
+tg:nctId              a owl:DatatypeProperty, owl:FunctionalProperty ; rdfs:range xsd:string .
+tg:title              a owl:DatatypeProperty ; rdfs:range xsd:string .
+tg:startDate          a owl:DatatypeProperty ; rdfs:range xsd:date .
+tg:actualEnrollment   a owl:DatatypeProperty ; rdfs:range xsd:integer ;
+    rdfs:comment "Set only when the registry marks the count ACTUAL." .
+tg:plannedEnrollment  a owl:DatatypeProperty ; rdfs:range xsd:integer ;
+    rdfs:comment "Set only when the registry marks the count ESTIMATED." .

@@ -1,0 +1,2774 @@
+{
+  "stats": {
+    "tables": 33,
+    "columns": 194,
+    "gold_columns": 66,
+    "gold_documented": 66,
+    "gold_traced_to_source": 65,
+    "lineage_edges": 193,
+    "pii_columns": 3
+  },
+  "tables": [
+    {
+      "name": "bronze.quarantine",
+      "layer": "bronze",
+      "description": null,
+      "grain": null,
+      "owner": "dsai-data-engineering",
+      "tags": [],
+      "row_count": 0,
+      "upstream_tables": [],
+      "columns": [
+        {
+          "name": "reason",
+          "type": "VARCHAR",
+          "description": null,
+          "pii": false,
+          "inputs": [],
+          "sources": []
+        },
+        {
+          "name": "payload",
+          "type": "VARCHAR",
+          "description": null,
+          "pii": false,
+          "inputs": [],
+          "sources": []
+        },
+        {
+          "name": "payload_sha256",
+          "type": "VARCHAR",
+          "description": null,
+          "pii": false,
+          "inputs": [],
+          "sources": []
+        },
+        {
+          "name": "source",
+          "type": "VARCHAR",
+          "description": null,
+          "pii": false,
+          "inputs": [],
+          "sources": []
+        },
+        {
+          "name": "batch_id",
+          "type": "VARCHAR",
+          "description": null,
+          "pii": false,
+          "inputs": [],
+          "sources": []
+        },
+        {
+          "name": "ingested_at",
+          "type": "TIMESTAMP",
+          "description": null,
+          "pii": false,
+          "inputs": [],
+          "sources": []
+        }
+      ]
+    },
+    {
+      "name": "bronze.raw_studies",
+      "layer": "bronze",
+      "description": null,
+      "grain": null,
+      "owner": "dsai-data-engineering",
+      "tags": [],
+      "row_count": 5317,
+      "upstream_tables": [],
+      "columns": [
+        {
+          "name": "nct_id",
+          "type": "VARCHAR",
+          "description": null,
+          "pii": false,
+          "inputs": [],
+          "sources": []
+        },
+        {
+          "name": "payload",
+          "type": "VARCHAR",
+          "description": null,
+          "pii": false,
+          "inputs": [],
+          "sources": []
+        },
+        {
+          "name": "payload_sha256",
+          "type": "VARCHAR",
+          "description": null,
+          "pii": false,
+          "inputs": [],
+          "sources": []
+        },
+        {
+          "name": "last_update_posted",
+          "type": "VARCHAR",
+          "description": null,
+          "pii": false,
+          "inputs": [],
+          "sources": []
+        },
+        {
+          "name": "source",
+          "type": "VARCHAR",
+          "description": null,
+          "pii": false,
+          "inputs": [],
+          "sources": []
+        },
+        {
+          "name": "batch_id",
+          "type": "VARCHAR",
+          "description": null,
+          "pii": false,
+          "inputs": [],
+          "sources": []
+        },
+        {
+          "name": "ingested_at",
+          "type": "TIMESTAMP",
+          "description": null,
+          "pii": false,
+          "inputs": [],
+          "sources": []
+        }
+      ]
+    },
+    {
+      "name": "gold.brg_trial_condition",
+      "layer": "gold",
+      "description": "Trial to MeSH descriptor. Many-to-many - aggregate through it with COUNT DISTINCT.",
+      "grain": "nct_id, mesh_id",
+      "owner": "dsai-data-engineering",
+      "tags": [],
+      "row_count": 35478,
+      "upstream_tables": [
+        "silver.trial_condition_mesh"
+      ],
+      "columns": [
+        {
+          "name": "nct_id",
+          "type": "VARCHAR",
+          "description": "Trial",
+          "pii": false,
+          "inputs": [
+            "silver.trial_condition_mesh.nct_id"
+          ],
+          "sources": [
+            "protocolSection.identificationModule.nctId"
+          ]
+        },
+        {
+          "name": "mesh_id",
+          "type": "VARCHAR",
+          "description": "MeSH descriptor",
+          "pii": false,
+          "inputs": [
+            "silver.trial_condition_mesh.mesh_id"
+          ],
+          "sources": [
+            "derivedSection.conditionBrowseModule.ancestors[*].id",
+            "derivedSection.conditionBrowseModule.meshes[*].id"
+          ]
+        },
+        {
+          "name": "relation",
+          "type": "VARCHAR",
+          "description": "direct | ancestor - how the descriptor relates to the trial's conditions",
+          "pii": false,
+          "inputs": [
+            "silver.trial_condition_mesh.relation"
+          ],
+          "sources": [
+            "derivedSection.conditionBrowseModule.ancestors[*]",
+            "derivedSection.conditionBrowseModule.meshes[*]"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "gold.brg_trial_condition_text",
+      "layer": "gold",
+      "description": "Trial to condition as registered in free text. Complements the MeSH bridge, which misses trials the registry never mapped.",
+      "grain": "nct_id, condition_text",
+      "owner": "dsai-data-engineering",
+      "tags": [],
+      "row_count": 10907,
+      "upstream_tables": [
+        "staging.stg_conditions"
+      ],
+      "columns": [
+        {
+          "name": "nct_id",
+          "type": "VARCHAR",
+          "description": "Trial",
+          "pii": false,
+          "inputs": [
+            "staging.stg_conditions.nct_id"
+          ],
+          "sources": [
+            "protocolSection.identificationModule.nctId"
+          ]
+        },
+        {
+          "name": "condition_text",
+          "type": "VARCHAR",
+          "description": "Condition exactly as the sponsor registered it",
+          "pii": false,
+          "inputs": [
+            "staging.stg_conditions.condition_text"
+          ],
+          "sources": [
+            "protocolSection.conditionsModule.conditions[*]"
+          ]
+        },
+        {
+          "name": "condition_text_lower",
+          "type": "VARCHAR",
+          "description": "Lower-cased condition text for case-insensitive matching",
+          "pii": false,
+          "inputs": [
+            "staging.stg_conditions.condition_text"
+          ],
+          "sources": [
+            "protocolSection.conditionsModule.conditions[*]"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "gold.brg_trial_country",
+      "layer": "gold",
+      "description": "Trial to country with at least one site.",
+      "grain": "nct_id, country",
+      "owner": "dsai-data-engineering",
+      "tags": [],
+      "row_count": 9216,
+      "upstream_tables": [
+        "silver.trial_country"
+      ],
+      "columns": [
+        {
+          "name": "nct_id",
+          "type": "VARCHAR",
+          "description": "Trial",
+          "pii": false,
+          "inputs": [
+            "silver.trial_country.nct_id"
+          ],
+          "sources": [
+            "protocolSection.identificationModule.nctId"
+          ]
+        },
+        {
+          "name": "country",
+          "type": "VARCHAR",
+          "description": "Country name as registered",
+          "pii": false,
+          "inputs": [
+            "silver.trial_country.country"
+          ],
+          "sources": [
+            "protocolSection.contactsLocationsModule.locations[*].country"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "gold.brg_trial_intervention",
+      "layer": "gold",
+      "description": "Trial to resolved intervention.",
+      "grain": "nct_id, intervention_key",
+      "owner": "dsai-data-engineering",
+      "tags": [],
+      "row_count": 8792,
+      "upstream_tables": [
+        "silver.trial_intervention"
+      ],
+      "columns": [
+        {
+          "name": "nct_id",
+          "type": "VARCHAR",
+          "description": "Trial",
+          "pii": false,
+          "inputs": [
+            "silver.trial_intervention.nct_id"
+          ],
+          "sources": [
+            "protocolSection.identificationModule.nctId"
+          ]
+        },
+        {
+          "name": "intervention_key",
+          "type": "VARCHAR",
+          "description": "Resolved intervention",
+          "pii": false,
+          "inputs": [
+            "silver.trial_intervention.intervention_key"
+          ],
+          "sources": [
+            "protocolSection.armsInterventionsModule.interventions[*].name",
+            "protocolSection.armsInterventionsModule.interventions[*].otherNames"
+          ]
+        },
+        {
+          "name": "is_placebo",
+          "type": "BOOLEAN",
+          "description": "Whether this arm's intervention is a placebo",
+          "pii": false,
+          "inputs": [
+            "silver.trial_intervention.is_placebo"
+          ],
+          "sources": [
+            "protocolSection.armsInterventionsModule.interventions[*].name"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "gold.brg_trial_sponsor",
+      "layer": "gold",
+      "description": "Trial to resolved sponsor, lead and collaborators.",
+      "grain": "nct_id, sponsor_key, role",
+      "owner": "dsai-data-engineering",
+      "tags": [],
+      "row_count": 9423,
+      "upstream_tables": [
+        "silver.trial_sponsor"
+      ],
+      "columns": [
+        {
+          "name": "nct_id",
+          "type": "VARCHAR",
+          "description": "Trial",
+          "pii": false,
+          "inputs": [
+            "silver.trial_sponsor.nct_id"
+          ],
+          "sources": [
+            "protocolSection.identificationModule.nctId"
+          ]
+        },
+        {
+          "name": "sponsor_key",
+          "type": "VARCHAR",
+          "description": "Resolved sponsor",
+          "pii": false,
+          "inputs": [
+            "silver.trial_sponsor.sponsor_key"
+          ],
+          "sources": [
+            "protocolSection.sponsorCollaboratorsModule.collaborators[*].name",
+            "protocolSection.sponsorCollaboratorsModule.leadSponsor.name"
+          ]
+        },
+        {
+          "name": "role",
+          "type": "VARCHAR",
+          "description": "lead | collaborator",
+          "pii": false,
+          "inputs": [
+            "silver.trial_sponsor.role"
+          ],
+          "sources": [
+            "protocolSection.sponsorCollaboratorsModule.collaborators[*]",
+            "protocolSection.sponsorCollaboratorsModule.leadSponsor"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "gold.dim_condition",
+      "layer": "gold",
+      "description": "One row per MeSH descriptor any trial maps to.",
+      "grain": "mesh_id",
+      "owner": "dsai-data-engineering",
+      "tags": [],
+      "row_count": 870,
+      "upstream_tables": [
+        "silver.trial_condition_mesh"
+      ],
+      "columns": [
+        {
+          "name": "mesh_id",
+          "type": "VARCHAR",
+          "description": "MeSH descriptor ID as supplied by the registry",
+          "pii": false,
+          "inputs": [
+            "silver.trial_condition_mesh.mesh_id"
+          ],
+          "sources": [
+            "derivedSection.conditionBrowseModule.ancestors[*].id",
+            "derivedSection.conditionBrowseModule.meshes[*].id"
+          ]
+        },
+        {
+          "name": "mesh_term",
+          "type": "VARCHAR",
+          "description": "MeSH preferred term",
+          "pii": false,
+          "inputs": [
+            "silver.trial_condition_mesh.mesh_term"
+          ],
+          "sources": [
+            "derivedSection.conditionBrowseModule.ancestors[*].term",
+            "derivedSection.conditionBrowseModule.meshes[*].term"
+          ]
+        },
+        {
+          "name": "trials_direct",
+          "type": "BIGINT",
+          "description": "Trials whose conditions map to this descriptor directly",
+          "pii": false,
+          "inputs": [
+            "silver.trial_condition_mesh.nct_id",
+            "silver.trial_condition_mesh.relation"
+          ],
+          "sources": [
+            "derivedSection.conditionBrowseModule.ancestors[*]",
+            "derivedSection.conditionBrowseModule.meshes[*]",
+            "protocolSection.identificationModule.nctId"
+          ]
+        },
+        {
+          "name": "trials_direct_or_descendant",
+          "type": "BIGINT",
+          "description": "Trials mapping to this descriptor or any descriptor beneath it",
+          "pii": false,
+          "inputs": [
+            "silver.trial_condition_mesh.nct_id"
+          ],
+          "sources": [
+            "protocolSection.identificationModule.nctId"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "gold.dim_intervention",
+      "layer": "gold",
+      "description": "One row per resolved product or intervention.",
+      "grain": "intervention_key",
+      "owner": "dsai-data-engineering",
+      "tags": [],
+      "row_count": 5476,
+      "upstream_tables": [
+        "silver.map_intervention"
+      ],
+      "columns": [
+        {
+          "name": "intervention_key",
+          "type": "VARCHAR",
+          "description": "Resolved product key",
+          "pii": false,
+          "inputs": [
+            "silver.map_intervention.intervention_key"
+          ],
+          "sources": [
+            "protocolSection.armsInterventionsModule.interventions[*].name",
+            "protocolSection.armsInterventionsModule.interventions[*].otherNames"
+          ]
+        },
+        {
+          "name": "intervention_name",
+          "type": "VARCHAR",
+          "description": "Display name",
+          "pii": false,
+          "inputs": [
+            "silver.map_intervention.intervention_name"
+          ],
+          "sources": [
+            "protocolSection.armsInterventionsModule.interventions[*].name",
+            "protocolSection.armsInterventionsModule.interventions[*].otherNames"
+          ]
+        },
+        {
+          "name": "intervention_type",
+          "type": "VARCHAR",
+          "description": "DRUG | BIOLOGICAL | DEVICE | PROCEDURE | BEHAVIORAL | ...",
+          "pii": false,
+          "inputs": [
+            "silver.map_intervention.intervention_type"
+          ],
+          "sources": [
+            "protocolSection.armsInterventionsModule.interventions[*].type"
+          ]
+        },
+        {
+          "name": "synonym_count",
+          "type": "INTEGER",
+          "description": "Number of names resolved to this product",
+          "pii": false,
+          "inputs": [
+            "silver.map_intervention.group_size"
+          ],
+          "sources": [
+            "protocolSection.armsInterventionsModule.interventions[*].otherNames"
+          ]
+        },
+        {
+          "name": "is_placebo",
+          "type": "BOOLEAN",
+          "description": "Whether this entity is a placebo",
+          "pii": false,
+          "inputs": [
+            "silver.map_intervention.is_placebo"
+          ],
+          "sources": [
+            "protocolSection.armsInterventionsModule.interventions[*].name"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "gold.dim_sponsor",
+      "layer": "gold",
+      "description": "One row per resolved sponsor entity.",
+      "grain": "sponsor_key",
+      "owner": "dsai-data-engineering",
+      "tags": [],
+      "row_count": 3524,
+      "upstream_tables": [
+        "silver.map_sponsor"
+      ],
+      "columns": [
+        {
+          "name": "sponsor_key",
+          "type": "VARCHAR",
+          "description": "Normalised sponsor key",
+          "pii": false,
+          "inputs": [
+            "silver.map_sponsor.sponsor_key"
+          ],
+          "sources": [
+            "protocolSection.sponsorCollaboratorsModule.collaborators[*].name",
+            "protocolSection.sponsorCollaboratorsModule.leadSponsor.name"
+          ]
+        },
+        {
+          "name": "sponsor_name",
+          "type": "VARCHAR",
+          "description": "Display name - the most frequent registered spelling",
+          "pii": false,
+          "inputs": [
+            "silver.map_sponsor.sponsor_name"
+          ],
+          "sources": [
+            "protocolSection.sponsorCollaboratorsModule.collaborators[*].name",
+            "protocolSection.sponsorCollaboratorsModule.leadSponsor.name"
+          ]
+        },
+        {
+          "name": "sponsor_class",
+          "type": "VARCHAR",
+          "description": "INDUSTRY | NIH | FED | OTHER_GOV | NETWORK | INDIV | OTHER",
+          "pii": false,
+          "inputs": [
+            "silver.map_sponsor.sponsor_class"
+          ],
+          "sources": [
+            "protocolSection.sponsorCollaboratorsModule.collaborators[*].class",
+            "protocolSection.sponsorCollaboratorsModule.leadSponsor.class"
+          ]
+        },
+        {
+          "name": "raw_name_variants",
+          "type": "BIGINT",
+          "description": "Number of distinct registered spellings folded into this sponsor",
+          "pii": false,
+          "inputs": [
+            "silver.map_sponsor.sponsor_name_raw"
+          ],
+          "sources": [
+            "protocolSection.sponsorCollaboratorsModule.collaborators[*].name",
+            "protocolSection.sponsorCollaboratorsModule.leadSponsor.name"
+          ]
+        },
+        {
+          "name": "parent_sponsor_key",
+          "type": "VARCHAR",
+          "description": "Parent company where the registry itself states one; else null",
+          "pii": false,
+          "inputs": [
+            "silver.map_sponsor.parent_sponsor_key"
+          ],
+          "sources": [
+            "protocolSection.sponsorCollaboratorsModule.collaborators[*].name",
+            "protocolSection.sponsorCollaboratorsModule.leadSponsor.name"
+          ]
+        },
+        {
+          "name": "parent_sponsor_name",
+          "type": "VARCHAR",
+          "description": "Parent company display name",
+          "pii": false,
+          "inputs": [
+            "silver.map_sponsor.parent_sponsor_name"
+          ],
+          "sources": [
+            "protocolSection.sponsorCollaboratorsModule.collaborators[*].name",
+            "protocolSection.sponsorCollaboratorsModule.leadSponsor.name"
+          ]
+        },
+        {
+          "name": "group_sponsor_key",
+          "type": "VARCHAR",
+          "description": "Parent if stated",
+          "pii": false,
+          "inputs": [
+            "silver.map_sponsor.parent_sponsor_key",
+            "silver.map_sponsor.sponsor_key"
+          ],
+          "sources": [
+            "protocolSection.sponsorCollaboratorsModule.collaborators[*].name",
+            "protocolSection.sponsorCollaboratorsModule.leadSponsor.name"
+          ]
+        },
+        {
+          "name": "group_sponsor_name",
+          "type": "VARCHAR",
+          "description": "Display name at the roll-up level",
+          "pii": false,
+          "inputs": [
+            "silver.map_sponsor.parent_sponsor_name",
+            "silver.map_sponsor.sponsor_name"
+          ],
+          "sources": [
+            "protocolSection.sponsorCollaboratorsModule.collaborators[*].name",
+            "protocolSection.sponsorCollaboratorsModule.leadSponsor.name"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "gold.fct_trial",
+      "layer": "gold",
+      "description": "The trial fact. One row per trial; every governed metric is defined at this grain.",
+      "grain": "nct_id",
+      "owner": "dsai-data-engineering",
+      "tags": [],
+      "row_count": 5317,
+      "upstream_tables": [
+        "silver.trial",
+        "silver.trial_contact_flag",
+        "silver.trial_phase",
+        "silver.trial_sponsor"
+      ],
+      "columns": [
+        {
+          "name": "nct_id",
+          "type": "VARCHAR",
+          "description": "ClinicalTrials.gov identifier",
+          "pii": false,
+          "inputs": [
+            "silver.trial.nct_id"
+          ],
+          "sources": [
+            "protocolSection.identificationModule.nctId"
+          ]
+        },
+        {
+          "name": "brief_title",
+          "type": "VARCHAR",
+          "description": "Short public title of the trial",
+          "pii": false,
+          "inputs": [
+            "silver.trial.brief_title"
+          ],
+          "sources": [
+            "protocolSection.identificationModule.briefTitle"
+          ]
+        },
+        {
+          "name": "overall_status",
+          "type": "VARCHAR",
+          "description": "Registry recruitment status; UNRECOGNISED if outside the registry's code list",
+          "pii": false,
+          "inputs": [
+            "silver.trial.overall_status"
+          ],
+          "sources": [
+            "protocolSection.statusModule.overallStatus"
+          ]
+        },
+        {
+          "name": "status_group",
+          "type": "VARCHAR",
+          "description": "ongoing | completed | stopped | unknown - status collapsed for analysis",
+          "pii": false,
+          "inputs": [
+            "silver.trial.overall_status"
+          ],
+          "sources": [
+            "protocolSection.statusModule.overallStatus"
+          ]
+        },
+        {
+          "name": "why_stopped",
+          "type": "VARCHAR",
+          "description": "Free-text reason given for terminating",
+          "pii": false,
+          "inputs": [
+            "silver.trial.why_stopped"
+          ],
+          "sources": [
+            "protocolSection.statusModule.whyStopped"
+          ]
+        },
+        {
+          "name": "phase_label",
+          "type": "VARCHAR",
+          "description": "Phase, keeping combinations such as PHASE2/PHASE3; NA for non-drug trials",
+          "pii": false,
+          "inputs": [
+            "silver.trial_phase.phase_label"
+          ],
+          "sources": [
+            "protocolSection.designModule.phases[*]"
+          ]
+        },
+        {
+          "name": "phase_rank",
+          "type": "INTEGER",
+          "description": "Highest phase reached, 0 = early phase 1 to 4 = phase 4; null if not applicable",
+          "pii": false,
+          "inputs": [
+            "silver.trial_phase.phase_rank"
+          ],
+          "sources": [
+            "protocolSection.designModule.phases[*]"
+          ]
+        },
+        {
+          "name": "start_date",
+          "type": "DATE",
+          "description": "Start date; month-only registry dates are set to the 1st - see start_date_precision",
+          "pii": false,
+          "inputs": [
+            "silver.trial.start_date"
+          ],
+          "sources": [
+            "protocolSection.statusModule.startDateStruct.date"
+          ]
+        },
+        {
+          "name": "start_date_precision",
+          "type": "VARCHAR",
+          "description": "day | month - how precise start_date really is",
+          "pii": false,
+          "inputs": [
+            "silver.trial.start_date_precision"
+          ],
+          "sources": [
+            "protocolSection.statusModule.startDateStruct.date"
+          ]
+        },
+        {
+          "name": "start_year",
+          "type": "BIGINT",
+          "description": "Calendar year of start_date",
+          "pii": false,
+          "inputs": [
+            "silver.trial.start_date"
+          ],
+          "sources": [
+            "protocolSection.statusModule.startDateStruct.date"
+          ]
+        },
+        {
+          "name": "primary_completion_date",
+          "type": "DATE",
+          "description": "Primary completion date",
+          "pii": false,
+          "inputs": [
+            "silver.trial.primary_completion_date"
+          ],
+          "sources": [
+            "protocolSection.statusModule.primaryCompletionDateStruct.date"
+          ]
+        },
+        {
+          "name": "enrollment_actual",
+          "type": "INTEGER",
+          "description": "Participants actually enrolled; null unless the registry marks the count ACTUAL",
+          "pii": false,
+          "inputs": [
+            "silver.trial.enrollment_actual"
+          ],
+          "sources": [
+            "protocolSection.designModule.enrollmentInfo.count",
+            "protocolSection.designModule.enrollmentInfo.type"
+          ]
+        },
+        {
+          "name": "enrollment_planned",
+          "type": "INTEGER",
+          "description": "Anticipated enrollment; null unless the registry marks the count ESTIMATED",
+          "pii": false,
+          "inputs": [
+            "silver.trial.enrollment_planned"
+          ],
+          "sources": [
+            "protocolSection.designModule.enrollmentInfo.count",
+            "protocolSection.designModule.enrollmentInfo.type"
+          ]
+        },
+        {
+          "name": "enrollment_type",
+          "type": "VARCHAR",
+          "description": "ACTUAL | ESTIMATED - which of the two columns above is populated",
+          "pii": false,
+          "inputs": [
+            "silver.trial.enrollment_type"
+          ],
+          "sources": [
+            "protocolSection.designModule.enrollmentInfo.type"
+          ]
+        },
+        {
+          "name": "has_results",
+          "type": "BOOLEAN",
+          "description": "Whether results are posted on the registry",
+          "pii": false,
+          "inputs": [
+            "silver.trial.has_results"
+          ],
+          "sources": [
+            "hasResults"
+          ]
+        },
+        {
+          "name": "allocation",
+          "type": "VARCHAR",
+          "description": "RANDOMIZED | NON_RANDOMIZED | NA",
+          "pii": false,
+          "inputs": [
+            "silver.trial.allocation"
+          ],
+          "sources": [
+            "protocolSection.designModule.designInfo.allocation"
+          ]
+        },
+        {
+          "name": "lead_sponsor_key",
+          "type": "VARCHAR",
+          "description": "Resolved lead sponsor; joins gold.dim_sponsor",
+          "pii": false,
+          "inputs": [
+            "silver.trial_sponsor.sponsor_key"
+          ],
+          "sources": [
+            "protocolSection.sponsorCollaboratorsModule.collaborators[*].name",
+            "protocolSection.sponsorCollaboratorsModule.leadSponsor.name"
+          ]
+        },
+        {
+          "name": "has_central_contact",
+          "type": "BOOLEAN",
+          "description": "Whether a central contact is published. Derived from whether a contact row exists, never from contact values - deliberately has no source path, which is what keeps it clear of the PII lineage check.",
+          "pii": false,
+          "inputs": [
+            "silver.trial_contact_flag.has_central_contact"
+          ],
+          "sources": []
+        },
+        {
+          "name": "last_update_posted",
+          "type": "DATE",
+          "description": "Date the registry record was last updated",
+          "pii": false,
+          "inputs": [
+            "silver.trial.last_update_posted"
+          ],
+          "sources": [
+            "protocolSection.statusModule.lastUpdatePostDateStruct.date"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "gold.rag_chunks",
+      "layer": "gold",
+      "description": "Retrieval chunks of each trial's summary and eligibility text.",
+      "grain": "chunk_id",
+      "owner": "dsai-data-engineering",
+      "tags": [],
+      "row_count": 21009,
+      "upstream_tables": [
+        "staging.stg_studies"
+      ],
+      "columns": [
+        {
+          "name": "chunk_id",
+          "type": "VARCHAR",
+          "description": "nct_id#section#ordinal - stable citation handle",
+          "pii": false,
+          "inputs": [
+            "staging.stg_studies.nct_id"
+          ],
+          "sources": [
+            "protocolSection.identificationModule.nctId"
+          ]
+        },
+        {
+          "name": "nct_id",
+          "type": "VARCHAR",
+          "description": "Trial the chunk came from",
+          "pii": false,
+          "inputs": [
+            "staging.stg_studies.nct_id"
+          ],
+          "sources": [
+            "protocolSection.identificationModule.nctId"
+          ]
+        },
+        {
+          "name": "section",
+          "type": "VARCHAR",
+          "description": "brief_summary | eligibility_criteria",
+          "pii": false,
+          "inputs": [
+            "staging.stg_studies.brief_summary",
+            "staging.stg_studies.eligibility_criteria"
+          ],
+          "sources": [
+            "protocolSection.descriptionModule.briefSummary",
+            "protocolSection.eligibilityModule.eligibilityCriteria"
+          ]
+        },
+        {
+          "name": "chunk_ord",
+          "type": "INTEGER",
+          "description": "Position of the chunk within its section",
+          "pii": false,
+          "inputs": [
+            "staging.stg_studies.brief_summary",
+            "staging.stg_studies.eligibility_criteria"
+          ],
+          "sources": [
+            "protocolSection.descriptionModule.briefSummary",
+            "protocolSection.eligibilityModule.eligibilityCriteria"
+          ]
+        },
+        {
+          "name": "chunk_text",
+          "type": "VARCHAR",
+          "description": "Chunk text",
+          "pii": false,
+          "inputs": [
+            "staging.stg_studies.brief_summary",
+            "staging.stg_studies.eligibility_criteria"
+          ],
+          "sources": [
+            "protocolSection.descriptionModule.briefSummary",
+            "protocolSection.eligibilityModule.eligibilityCriteria"
+          ]
+        },
+        {
+          "name": "n_words",
+          "type": "INTEGER",
+          "description": "Words in the chunk",
+          "pii": false,
+          "inputs": [
+            "staging.stg_studies.brief_summary",
+            "staging.stg_studies.eligibility_criteria"
+          ],
+          "sources": [
+            "protocolSection.descriptionModule.briefSummary",
+            "protocolSection.eligibilityModule.eligibilityCriteria"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "gold.rag_chunks_enriched",
+      "layer": "gold",
+      "description": "Chunks with governed trial attributes attached for filtered retrieval.",
+      "grain": "chunk_id",
+      "owner": "dsai-data-engineering",
+      "tags": [],
+      "row_count": 21009,
+      "upstream_tables": [
+        "gold.dim_sponsor",
+        "gold.fct_trial",
+        "gold.rag_chunks"
+      ],
+      "columns": [
+        {
+          "name": "chunk_id",
+          "type": "VARCHAR",
+          "description": "Citation handle",
+          "pii": false,
+          "inputs": [
+            "gold.rag_chunks.chunk_id"
+          ],
+          "sources": [
+            "protocolSection.identificationModule.nctId"
+          ]
+        },
+        {
+          "name": "nct_id",
+          "type": "VARCHAR",
+          "description": "Trial",
+          "pii": false,
+          "inputs": [
+            "gold.rag_chunks.nct_id"
+          ],
+          "sources": [
+            "protocolSection.identificationModule.nctId"
+          ]
+        },
+        {
+          "name": "section",
+          "type": "VARCHAR",
+          "description": "Section of the record",
+          "pii": false,
+          "inputs": [
+            "gold.rag_chunks.section"
+          ],
+          "sources": [
+            "protocolSection.descriptionModule.briefSummary",
+            "protocolSection.eligibilityModule.eligibilityCriteria"
+          ]
+        },
+        {
+          "name": "chunk_ord",
+          "type": "INTEGER",
+          "description": "Position within the section",
+          "pii": false,
+          "inputs": [
+            "gold.rag_chunks.chunk_ord"
+          ],
+          "sources": [
+            "protocolSection.descriptionModule.briefSummary",
+            "protocolSection.eligibilityModule.eligibilityCriteria"
+          ]
+        },
+        {
+          "name": "chunk_text",
+          "type": "VARCHAR",
+          "description": "Chunk text",
+          "pii": false,
+          "inputs": [
+            "gold.rag_chunks.chunk_text"
+          ],
+          "sources": [
+            "protocolSection.descriptionModule.briefSummary",
+            "protocolSection.eligibilityModule.eligibilityCriteria"
+          ]
+        },
+        {
+          "name": "overall_status",
+          "type": "VARCHAR",
+          "description": "Trial status",
+          "pii": false,
+          "inputs": [
+            "gold.fct_trial.overall_status"
+          ],
+          "sources": [
+            "protocolSection.statusModule.overallStatus"
+          ]
+        },
+        {
+          "name": "status_group",
+          "type": "VARCHAR",
+          "description": "Collapsed status",
+          "pii": false,
+          "inputs": [
+            "gold.fct_trial.status_group"
+          ],
+          "sources": [
+            "protocolSection.statusModule.overallStatus"
+          ]
+        },
+        {
+          "name": "phase_label",
+          "type": "VARCHAR",
+          "description": "Phase",
+          "pii": false,
+          "inputs": [
+            "gold.fct_trial.phase_label"
+          ],
+          "sources": [
+            "protocolSection.designModule.phases[*]"
+          ]
+        },
+        {
+          "name": "start_year",
+          "type": "BIGINT",
+          "description": "Start year",
+          "pii": false,
+          "inputs": [
+            "gold.fct_trial.start_year"
+          ],
+          "sources": [
+            "protocolSection.statusModule.startDateStruct.date"
+          ]
+        },
+        {
+          "name": "lead_sponsor_name",
+          "type": "VARCHAR",
+          "description": "Lead sponsor display name",
+          "pii": false,
+          "inputs": [
+            "gold.dim_sponsor.sponsor_name"
+          ],
+          "sources": [
+            "protocolSection.sponsorCollaboratorsModule.collaborators[*].name",
+            "protocolSection.sponsorCollaboratorsModule.leadSponsor.name"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "meta.rejected_links",
+      "layer": "meta",
+      "description": null,
+      "grain": null,
+      "owner": "dsai-data-engineering",
+      "tags": [],
+      "row_count": 144,
+      "upstream_tables": [
+        "staging.stg_interventions",
+        "staging.stg_sponsors"
+      ],
+      "columns": [
+        {
+          "name": "name_a",
+          "type": "VARCHAR",
+          "description": null,
+          "pii": false,
+          "inputs": [],
+          "sources": []
+        },
+        {
+          "name": "name_b",
+          "type": "VARCHAR",
+          "description": null,
+          "pii": false,
+          "inputs": [],
+          "sources": []
+        },
+        {
+          "name": "asserted_by",
+          "type": "VARCHAR",
+          "description": null,
+          "pii": false,
+          "inputs": [],
+          "sources": []
+        },
+        {
+          "name": "reason",
+          "type": "VARCHAR",
+          "description": null,
+          "pii": false,
+          "inputs": [],
+          "sources": []
+        }
+      ]
+    },
+    {
+      "name": "silver.intervention_alias",
+      "layer": "silver",
+      "description": "Every known name for every product, with how far it can be trusted.",
+      "grain": "alias_key",
+      "owner": "dsai-data-engineering",
+      "tags": [],
+      "row_count": 6153,
+      "upstream_tables": [
+        "staging.stg_interventions",
+        "staging.stg_sponsors"
+      ],
+      "columns": [
+        {
+          "name": "alias_key",
+          "type": "VARCHAR",
+          "description": null,
+          "pii": false,
+          "inputs": [
+            "staging.stg_interventions.intervention_name",
+            "staging.stg_interventions.other_names"
+          ],
+          "sources": [
+            "protocolSection.armsInterventionsModule.interventions[*].name",
+            "protocolSection.armsInterventionsModule.interventions[*].otherNames"
+          ]
+        },
+        {
+          "name": "intervention_key",
+          "type": "VARCHAR",
+          "description": null,
+          "pii": false,
+          "inputs": [
+            "staging.stg_interventions.intervention_name",
+            "staging.stg_interventions.other_names"
+          ],
+          "sources": [
+            "protocolSection.armsInterventionsModule.interventions[*].name",
+            "protocolSection.armsInterventionsModule.interventions[*].otherNames"
+          ]
+        },
+        {
+          "name": "intervention_name",
+          "type": "VARCHAR",
+          "description": null,
+          "pii": false,
+          "inputs": [
+            "staging.stg_interventions.intervention_name"
+          ],
+          "sources": [
+            "protocolSection.armsInterventionsModule.interventions[*].name"
+          ]
+        },
+        {
+          "name": "is_primary_name",
+          "type": "BOOLEAN",
+          "description": null,
+          "pii": false,
+          "inputs": [
+            "staging.stg_interventions.intervention_name"
+          ],
+          "sources": [
+            "protocolSection.armsInterventionsModule.interventions[*].name"
+          ]
+        },
+        {
+          "name": "confidence",
+          "type": "VARCHAR",
+          "description": null,
+          "pii": false,
+          "inputs": [
+            "staging.stg_interventions.other_names"
+          ],
+          "sources": [
+            "protocolSection.armsInterventionsModule.interventions[*].otherNames"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "silver.map_intervention",
+      "layer": "silver",
+      "description": "Raw intervention name to resolved product entity.",
+      "grain": "intervention_name_raw",
+      "owner": "dsai-data-engineering",
+      "tags": [],
+      "row_count": 6423,
+      "upstream_tables": [
+        "staging.stg_interventions",
+        "staging.stg_sponsors"
+      ],
+      "columns": [
+        {
+          "name": "intervention_name_raw",
+          "type": "VARCHAR",
+          "description": null,
+          "pii": false,
+          "inputs": [
+            "staging.stg_interventions.intervention_name"
+          ],
+          "sources": [
+            "protocolSection.armsInterventionsModule.interventions[*].name"
+          ]
+        },
+        {
+          "name": "name_key",
+          "type": "VARCHAR",
+          "description": null,
+          "pii": false,
+          "inputs": [
+            "staging.stg_interventions.intervention_name"
+          ],
+          "sources": [
+            "protocolSection.armsInterventionsModule.interventions[*].name"
+          ]
+        },
+        {
+          "name": "intervention_key",
+          "type": "VARCHAR",
+          "description": null,
+          "pii": false,
+          "inputs": [
+            "staging.stg_interventions.intervention_name",
+            "staging.stg_interventions.other_names"
+          ],
+          "sources": [
+            "protocolSection.armsInterventionsModule.interventions[*].name",
+            "protocolSection.armsInterventionsModule.interventions[*].otherNames"
+          ]
+        },
+        {
+          "name": "intervention_name",
+          "type": "VARCHAR",
+          "description": null,
+          "pii": false,
+          "inputs": [
+            "staging.stg_interventions.intervention_name",
+            "staging.stg_interventions.other_names"
+          ],
+          "sources": [
+            "protocolSection.armsInterventionsModule.interventions[*].name",
+            "protocolSection.armsInterventionsModule.interventions[*].otherNames"
+          ]
+        },
+        {
+          "name": "intervention_type",
+          "type": "VARCHAR",
+          "description": null,
+          "pii": false,
+          "inputs": [
+            "staging.stg_interventions.intervention_type"
+          ],
+          "sources": [
+            "protocolSection.armsInterventionsModule.interventions[*].type"
+          ]
+        },
+        {
+          "name": "group_size",
+          "type": "INTEGER",
+          "description": null,
+          "pii": false,
+          "inputs": [
+            "staging.stg_interventions.other_names"
+          ],
+          "sources": [
+            "protocolSection.armsInterventionsModule.interventions[*].otherNames"
+          ]
+        },
+        {
+          "name": "is_placebo",
+          "type": "BOOLEAN",
+          "description": null,
+          "pii": false,
+          "inputs": [
+            "staging.stg_interventions.intervention_name"
+          ],
+          "sources": [
+            "protocolSection.armsInterventionsModule.interventions[*].name"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "silver.map_sponsor",
+      "layer": "silver",
+      "description": "Raw sponsor spelling to resolved sponsor entity, with registry-stated parent.",
+      "grain": "sponsor_name_raw",
+      "owner": "dsai-data-engineering",
+      "tags": [],
+      "row_count": 3542,
+      "upstream_tables": [
+        "staging.stg_interventions",
+        "staging.stg_sponsors"
+      ],
+      "columns": [
+        {
+          "name": "sponsor_name_raw",
+          "type": "VARCHAR",
+          "description": null,
+          "pii": false,
+          "inputs": [
+            "staging.stg_sponsors.sponsor_name_raw"
+          ],
+          "sources": [
+            "protocolSection.sponsorCollaboratorsModule.collaborators[*].name",
+            "protocolSection.sponsorCollaboratorsModule.leadSponsor.name"
+          ]
+        },
+        {
+          "name": "sponsor_key",
+          "type": "VARCHAR",
+          "description": null,
+          "pii": false,
+          "inputs": [
+            "staging.stg_sponsors.sponsor_name_raw"
+          ],
+          "sources": [
+            "protocolSection.sponsorCollaboratorsModule.collaborators[*].name",
+            "protocolSection.sponsorCollaboratorsModule.leadSponsor.name"
+          ]
+        },
+        {
+          "name": "sponsor_name",
+          "type": "VARCHAR",
+          "description": null,
+          "pii": false,
+          "inputs": [
+            "staging.stg_sponsors.sponsor_name_raw"
+          ],
+          "sources": [
+            "protocolSection.sponsorCollaboratorsModule.collaborators[*].name",
+            "protocolSection.sponsorCollaboratorsModule.leadSponsor.name"
+          ]
+        },
+        {
+          "name": "sponsor_class",
+          "type": "VARCHAR",
+          "description": null,
+          "pii": false,
+          "inputs": [
+            "staging.stg_sponsors.sponsor_class"
+          ],
+          "sources": [
+            "protocolSection.sponsorCollaboratorsModule.collaborators[*].class",
+            "protocolSection.sponsorCollaboratorsModule.leadSponsor.class"
+          ]
+        },
+        {
+          "name": "parent_sponsor_key",
+          "type": "VARCHAR",
+          "description": null,
+          "pii": false,
+          "inputs": [
+            "staging.stg_sponsors.sponsor_name_raw"
+          ],
+          "sources": [
+            "protocolSection.sponsorCollaboratorsModule.collaborators[*].name",
+            "protocolSection.sponsorCollaboratorsModule.leadSponsor.name"
+          ]
+        },
+        {
+          "name": "parent_sponsor_name",
+          "type": "VARCHAR",
+          "description": null,
+          "pii": false,
+          "inputs": [
+            "staging.stg_sponsors.sponsor_name_raw"
+          ],
+          "sources": [
+            "protocolSection.sponsorCollaboratorsModule.collaborators[*].name",
+            "protocolSection.sponsorCollaboratorsModule.leadSponsor.name"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "silver.trial",
+      "layer": "silver",
+      "description": "One row per trial at its latest registry version, typed and conformed.",
+      "grain": "nct_id",
+      "owner": "dsai-data-engineering",
+      "tags": [],
+      "row_count": 5317,
+      "upstream_tables": [
+        "staging.stg_studies"
+      ],
+      "columns": [
+        {
+          "name": "nct_id",
+          "type": "VARCHAR",
+          "description": null,
+          "pii": false,
+          "inputs": [
+            "staging.stg_studies.nct_id"
+          ],
+          "sources": [
+            "protocolSection.identificationModule.nctId"
+          ]
+        },
+        {
+          "name": "brief_title",
+          "type": "VARCHAR",
+          "description": null,
+          "pii": false,
+          "inputs": [
+            "staging.stg_studies.brief_title"
+          ],
+          "sources": [
+            "protocolSection.identificationModule.briefTitle"
+          ]
+        },
+        {
+          "name": "overall_status",
+          "type": "VARCHAR",
+          "description": null,
+          "pii": false,
+          "inputs": [
+            "staging.stg_studies.overall_status"
+          ],
+          "sources": [
+            "protocolSection.statusModule.overallStatus"
+          ]
+        },
+        {
+          "name": "overall_status_raw",
+          "type": "VARCHAR",
+          "description": null,
+          "pii": false,
+          "inputs": [
+            "staging.stg_studies.overall_status"
+          ],
+          "sources": [
+            "protocolSection.statusModule.overallStatus"
+          ]
+        },
+        {
+          "name": "why_stopped",
+          "type": "VARCHAR",
+          "description": null,
+          "pii": false,
+          "inputs": [
+            "staging.stg_studies.why_stopped"
+          ],
+          "sources": [
+            "protocolSection.statusModule.whyStopped"
+          ]
+        },
+        {
+          "name": "start_date",
+          "type": "DATE",
+          "description": null,
+          "pii": false,
+          "inputs": [
+            "staging.stg_studies.start_date_raw"
+          ],
+          "sources": [
+            "protocolSection.statusModule.startDateStruct.date"
+          ]
+        },
+        {
+          "name": "start_date_precision",
+          "type": "VARCHAR",
+          "description": null,
+          "pii": false,
+          "inputs": [
+            "staging.stg_studies.start_date_raw"
+          ],
+          "sources": [
+            "protocolSection.statusModule.startDateStruct.date"
+          ]
+        },
+        {
+          "name": "start_date_raw",
+          "type": "VARCHAR",
+          "description": null,
+          "pii": false,
+          "inputs": [
+            "staging.stg_studies.start_date_raw"
+          ],
+          "sources": [
+            "protocolSection.statusModule.startDateStruct.date"
+          ]
+        },
+        {
+          "name": "primary_completion_date",
+          "type": "DATE",
+          "description": null,
+          "pii": false,
+          "inputs": [
+            "staging.stg_studies.primary_completion_date_raw"
+          ],
+          "sources": [
+            "protocolSection.statusModule.primaryCompletionDateStruct.date"
+          ]
+        },
+        {
+          "name": "primary_completion_date_type",
+          "type": "VARCHAR",
+          "description": null,
+          "pii": false,
+          "inputs": [
+            "staging.stg_studies.primary_completion_date_type"
+          ],
+          "sources": [
+            "protocolSection.statusModule.primaryCompletionDateStruct.type"
+          ]
+        },
+        {
+          "name": "last_update_posted",
+          "type": "DATE",
+          "description": null,
+          "pii": false,
+          "inputs": [
+            "staging.stg_studies.last_update_posted_raw"
+          ],
+          "sources": [
+            "protocolSection.statusModule.lastUpdatePostDateStruct.date"
+          ]
+        },
+        {
+          "name": "enrollment_count",
+          "type": "INTEGER",
+          "description": null,
+          "pii": false,
+          "inputs": [
+            "staging.stg_studies.enrollment_count"
+          ],
+          "sources": [
+            "protocolSection.designModule.enrollmentInfo.count"
+          ]
+        },
+        {
+          "name": "enrollment_type",
+          "type": "VARCHAR",
+          "description": null,
+          "pii": false,
+          "inputs": [
+            "staging.stg_studies.enrollment_type"
+          ],
+          "sources": [
+            "protocolSection.designModule.enrollmentInfo.type"
+          ]
+        },
+        {
+          "name": "enrollment_actual",
+          "type": "INTEGER",
+          "description": null,
+          "pii": false,
+          "inputs": [
+            "staging.stg_studies.enrollment_count",
+            "staging.stg_studies.enrollment_type"
+          ],
+          "sources": [
+            "protocolSection.designModule.enrollmentInfo.count",
+            "protocolSection.designModule.enrollmentInfo.type"
+          ]
+        },
+        {
+          "name": "enrollment_planned",
+          "type": "INTEGER",
+          "description": null,
+          "pii": false,
+          "inputs": [
+            "staging.stg_studies.enrollment_count",
+            "staging.stg_studies.enrollment_type"
+          ],
+          "sources": [
+            "protocolSection.designModule.enrollmentInfo.count",
+            "protocolSection.designModule.enrollmentInfo.type"
+          ]
+        },
+        {
+          "name": "has_results",
+          "type": "BOOLEAN",
+          "description": null,
+          "pii": false,
+          "inputs": [
+            "staging.stg_studies.has_results"
+          ],
+          "sources": [
+            "hasResults"
+          ]
+        },
+        {
+          "name": "allocation",
+          "type": "VARCHAR",
+          "description": null,
+          "pii": false,
+          "inputs": [
+            "staging.stg_studies.allocation"
+          ],
+          "sources": [
+            "protocolSection.designModule.designInfo.allocation"
+          ]
+        },
+        {
+          "name": "primary_purpose",
+          "type": "VARCHAR",
+          "description": null,
+          "pii": false,
+          "inputs": [
+            "staging.stg_studies.primary_purpose"
+          ],
+          "sources": [
+            "protocolSection.designModule.designInfo.primaryPurpose"
+          ]
+        },
+        {
+          "name": "study_type",
+          "type": "VARCHAR",
+          "description": null,
+          "pii": false,
+          "inputs": [
+            "staging.stg_studies.study_type"
+          ],
+          "sources": [
+            "protocolSection.designModule.studyType"
+          ]
+        },
+        {
+          "name": "batch_id",
+          "type": "VARCHAR",
+          "description": null,
+          "pii": false,
+          "inputs": [
+            "staging.stg_studies.batch_id"
+          ],
+          "sources": []
+        },
+        {
+          "name": "ingested_at",
+          "type": "TIMESTAMP",
+          "description": null,
+          "pii": false,
+          "inputs": [
+            "staging.stg_studies.ingested_at"
+          ],
+          "sources": []
+        }
+      ]
+    },
+    {
+      "name": "silver.trial_condition_mesh",
+      "layer": "silver",
+      "description": null,
+      "grain": null,
+      "owner": "dsai-data-engineering",
+      "tags": [],
+      "row_count": 35478,
+      "upstream_tables": [
+        "staging.stg_condition_mesh"
+      ],
+      "columns": [
+        {
+          "name": "nct_id",
+          "type": "VARCHAR",
+          "description": null,
+          "pii": false,
+          "inputs": [
+            "staging.stg_condition_mesh.nct_id"
+          ],
+          "sources": [
+            "protocolSection.identificationModule.nctId"
+          ]
+        },
+        {
+          "name": "mesh_id",
+          "type": "VARCHAR",
+          "description": null,
+          "pii": false,
+          "inputs": [
+            "staging.stg_condition_mesh.mesh_id"
+          ],
+          "sources": [
+            "derivedSection.conditionBrowseModule.ancestors[*].id",
+            "derivedSection.conditionBrowseModule.meshes[*].id"
+          ]
+        },
+        {
+          "name": "mesh_term",
+          "type": "VARCHAR",
+          "description": null,
+          "pii": false,
+          "inputs": [
+            "staging.stg_condition_mesh.mesh_term"
+          ],
+          "sources": [
+            "derivedSection.conditionBrowseModule.ancestors[*].term",
+            "derivedSection.conditionBrowseModule.meshes[*].term"
+          ]
+        },
+        {
+          "name": "relation",
+          "type": "VARCHAR",
+          "description": null,
+          "pii": false,
+          "inputs": [
+            "staging.stg_condition_mesh.relation"
+          ],
+          "sources": [
+            "derivedSection.conditionBrowseModule.ancestors[*]",
+            "derivedSection.conditionBrowseModule.meshes[*]"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "silver.trial_contact_flag",
+      "layer": "silver",
+      "description": "Whether a trial publishes a central contact - derived from row existence only.",
+      "grain": "nct_id",
+      "owner": "dsai-data-engineering",
+      "tags": [],
+      "row_count": 1427,
+      "upstream_tables": [
+        "staging.stg_contacts"
+      ],
+      "columns": [
+        {
+          "name": "nct_id",
+          "type": "VARCHAR",
+          "description": null,
+          "pii": false,
+          "inputs": [
+            "staging.stg_contacts.nct_id"
+          ],
+          "sources": [
+            "protocolSection.identificationModule.nctId"
+          ]
+        },
+        {
+          "name": "has_central_contact",
+          "type": "BOOLEAN",
+          "description": null,
+          "pii": false,
+          "inputs": [
+            "constant:has_central_contact"
+          ],
+          "sources": []
+        }
+      ]
+    },
+    {
+      "name": "silver.trial_country",
+      "layer": "silver",
+      "description": null,
+      "grain": null,
+      "owner": "dsai-data-engineering",
+      "tags": [],
+      "row_count": 9216,
+      "upstream_tables": [
+        "staging.stg_locations"
+      ],
+      "columns": [
+        {
+          "name": "nct_id",
+          "type": "VARCHAR",
+          "description": null,
+          "pii": false,
+          "inputs": [
+            "staging.stg_locations.nct_id"
+          ],
+          "sources": [
+            "protocolSection.identificationModule.nctId"
+          ]
+        },
+        {
+          "name": "country",
+          "type": "VARCHAR",
+          "description": null,
+          "pii": false,
+          "inputs": [
+            "staging.stg_locations.country"
+          ],
+          "sources": [
+            "protocolSection.contactsLocationsModule.locations[*].country"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "silver.trial_intervention",
+      "layer": "silver",
+      "description": null,
+      "grain": null,
+      "owner": "dsai-data-engineering",
+      "tags": [],
+      "row_count": 8792,
+      "upstream_tables": [
+        "silver.map_intervention",
+        "staging.stg_interventions"
+      ],
+      "columns": [
+        {
+          "name": "nct_id",
+          "type": "VARCHAR",
+          "description": null,
+          "pii": false,
+          "inputs": [
+            "staging.stg_interventions.nct_id"
+          ],
+          "sources": [
+            "protocolSection.identificationModule.nctId"
+          ]
+        },
+        {
+          "name": "intervention_key",
+          "type": "VARCHAR",
+          "description": null,
+          "pii": false,
+          "inputs": [
+            "silver.map_intervention.intervention_key"
+          ],
+          "sources": [
+            "protocolSection.armsInterventionsModule.interventions[*].name",
+            "protocolSection.armsInterventionsModule.interventions[*].otherNames"
+          ]
+        },
+        {
+          "name": "is_placebo",
+          "type": "BOOLEAN",
+          "description": null,
+          "pii": false,
+          "inputs": [
+            "silver.map_intervention.is_placebo"
+          ],
+          "sources": [
+            "protocolSection.armsInterventionsModule.interventions[*].name"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "silver.trial_phase",
+      "layer": "silver",
+      "description": null,
+      "grain": null,
+      "owner": "dsai-data-engineering",
+      "tags": [],
+      "row_count": 5317,
+      "upstream_tables": [
+        "staging.stg_phases",
+        "staging.stg_studies"
+      ],
+      "columns": [
+        {
+          "name": "nct_id",
+          "type": "VARCHAR",
+          "description": null,
+          "pii": false,
+          "inputs": [
+            "staging.stg_studies.nct_id"
+          ],
+          "sources": [
+            "protocolSection.identificationModule.nctId"
+          ]
+        },
+        {
+          "name": "phase_label",
+          "type": "VARCHAR",
+          "description": null,
+          "pii": false,
+          "inputs": [
+            "staging.stg_phases.phase"
+          ],
+          "sources": [
+            "protocolSection.designModule.phases[*]"
+          ]
+        },
+        {
+          "name": "phase_rank",
+          "type": "INTEGER",
+          "description": null,
+          "pii": false,
+          "inputs": [
+            "staging.stg_phases.phase"
+          ],
+          "sources": [
+            "protocolSection.designModule.phases[*]"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "silver.trial_sponsor",
+      "layer": "silver",
+      "description": null,
+      "grain": null,
+      "owner": "dsai-data-engineering",
+      "tags": [],
+      "row_count": 9423,
+      "upstream_tables": [
+        "silver.map_sponsor",
+        "staging.stg_sponsors"
+      ],
+      "columns": [
+        {
+          "name": "nct_id",
+          "type": "VARCHAR",
+          "description": null,
+          "pii": false,
+          "inputs": [
+            "staging.stg_sponsors.nct_id"
+          ],
+          "sources": [
+            "protocolSection.identificationModule.nctId"
+          ]
+        },
+        {
+          "name": "sponsor_key",
+          "type": "VARCHAR",
+          "description": null,
+          "pii": false,
+          "inputs": [
+            "silver.map_sponsor.sponsor_key"
+          ],
+          "sources": [
+            "protocolSection.sponsorCollaboratorsModule.collaborators[*].name",
+            "protocolSection.sponsorCollaboratorsModule.leadSponsor.name"
+          ]
+        },
+        {
+          "name": "role",
+          "type": "VARCHAR",
+          "description": null,
+          "pii": false,
+          "inputs": [
+            "staging.stg_sponsors.role"
+          ],
+          "sources": [
+            "protocolSection.sponsorCollaboratorsModule.collaborators[*]",
+            "protocolSection.sponsorCollaboratorsModule.leadSponsor"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "staging.stg_condition_mesh",
+      "layer": "staging",
+      "description": null,
+      "grain": null,
+      "owner": "dsai-data-engineering",
+      "tags": [],
+      "row_count": 35478,
+      "upstream_tables": [],
+      "columns": [
+        {
+          "name": "nct_id",
+          "type": "VARCHAR",
+          "description": null,
+          "pii": false,
+          "inputs": [
+            "source:protocolSection.identificationModule.nctId"
+          ],
+          "sources": [
+            "protocolSection.identificationModule.nctId"
+          ]
+        },
+        {
+          "name": "mesh_id",
+          "type": "VARCHAR",
+          "description": null,
+          "pii": false,
+          "inputs": [
+            "source:derivedSection.conditionBrowseModule.ancestors[*].id",
+            "source:derivedSection.conditionBrowseModule.meshes[*].id"
+          ],
+          "sources": [
+            "derivedSection.conditionBrowseModule.ancestors[*].id",
+            "derivedSection.conditionBrowseModule.meshes[*].id"
+          ]
+        },
+        {
+          "name": "mesh_term",
+          "type": "VARCHAR",
+          "description": null,
+          "pii": false,
+          "inputs": [
+            "source:derivedSection.conditionBrowseModule.ancestors[*].term",
+            "source:derivedSection.conditionBrowseModule.meshes[*].term"
+          ],
+          "sources": [
+            "derivedSection.conditionBrowseModule.ancestors[*].term",
+            "derivedSection.conditionBrowseModule.meshes[*].term"
+          ]
+        },
+        {
+          "name": "relation",
+          "type": "VARCHAR",
+          "description": null,
+          "pii": false,
+          "inputs": [
+            "source:derivedSection.conditionBrowseModule.ancestors[*]",
+            "source:derivedSection.conditionBrowseModule.meshes[*]"
+          ],
+          "sources": [
+            "derivedSection.conditionBrowseModule.ancestors[*]",
+            "derivedSection.conditionBrowseModule.meshes[*]"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "staging.stg_conditions",
+      "layer": "staging",
+      "description": null,
+      "grain": null,
+      "owner": "dsai-data-engineering",
+      "tags": [],
+      "row_count": 10907,
+      "upstream_tables": [],
+      "columns": [
+        {
+          "name": "nct_id",
+          "type": "VARCHAR",
+          "description": null,
+          "pii": false,
+          "inputs": [
+            "source:protocolSection.identificationModule.nctId"
+          ],
+          "sources": [
+            "protocolSection.identificationModule.nctId"
+          ]
+        },
+        {
+          "name": "ordinal",
+          "type": "INTEGER",
+          "description": null,
+          "pii": false,
+          "inputs": [],
+          "sources": []
+        },
+        {
+          "name": "condition_text",
+          "type": "VARCHAR",
+          "description": null,
+          "pii": false,
+          "inputs": [
+            "source:protocolSection.conditionsModule.conditions[*]"
+          ],
+          "sources": [
+            "protocolSection.conditionsModule.conditions[*]"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "staging.stg_contacts",
+      "layer": "staging",
+      "description": "Central contacts listed on each trial. Personal data; stops at staging.",
+      "grain": null,
+      "owner": "dsai-data-engineering",
+      "tags": [
+        "pii"
+      ],
+      "row_count": 2135,
+      "upstream_tables": [],
+      "columns": [
+        {
+          "name": "nct_id",
+          "type": "VARCHAR",
+          "description": null,
+          "pii": false,
+          "inputs": [
+            "source:protocolSection.identificationModule.nctId"
+          ],
+          "sources": [
+            "protocolSection.identificationModule.nctId"
+          ]
+        },
+        {
+          "name": "ordinal",
+          "type": "INTEGER",
+          "description": "Position of the contact in the registry record",
+          "pii": false,
+          "inputs": [],
+          "sources": []
+        },
+        {
+          "name": "contact_name",
+          "type": "VARCHAR",
+          "description": "Contact person's name",
+          "pii": true,
+          "inputs": [
+            "source:protocolSection.contactsLocationsModule.centralContacts[*].name"
+          ],
+          "sources": [
+            "protocolSection.contactsLocationsModule.centralContacts[*].name"
+          ]
+        },
+        {
+          "name": "contact_role",
+          "type": "VARCHAR",
+          "description": "Registry role of the contact",
+          "pii": false,
+          "inputs": [
+            "source:protocolSection.contactsLocationsModule.centralContacts[*].role"
+          ],
+          "sources": [
+            "protocolSection.contactsLocationsModule.centralContacts[*].role"
+          ]
+        },
+        {
+          "name": "contact_email",
+          "type": "VARCHAR",
+          "description": "Contact email address",
+          "pii": true,
+          "inputs": [
+            "source:protocolSection.contactsLocationsModule.centralContacts[*].email"
+          ],
+          "sources": [
+            "protocolSection.contactsLocationsModule.centralContacts[*].email"
+          ]
+        },
+        {
+          "name": "contact_phone",
+          "type": "VARCHAR",
+          "description": "Contact phone number",
+          "pii": true,
+          "inputs": [
+            "source:protocolSection.contactsLocationsModule.centralContacts[*].phone"
+          ],
+          "sources": [
+            "protocolSection.contactsLocationsModule.centralContacts[*].phone"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "staging.stg_intervention_mesh",
+      "layer": "staging",
+      "description": null,
+      "grain": null,
+      "owner": "dsai-data-engineering",
+      "tags": [],
+      "row_count": 18946,
+      "upstream_tables": [],
+      "columns": [
+        {
+          "name": "nct_id",
+          "type": "VARCHAR",
+          "description": null,
+          "pii": false,
+          "inputs": [
+            "source:protocolSection.identificationModule.nctId"
+          ],
+          "sources": [
+            "protocolSection.identificationModule.nctId"
+          ]
+        },
+        {
+          "name": "mesh_id",
+          "type": "VARCHAR",
+          "description": null,
+          "pii": false,
+          "inputs": [
+            "source:derivedSection.interventionBrowseModule.ancestors[*].id",
+            "source:derivedSection.interventionBrowseModule.meshes[*].id"
+          ],
+          "sources": [
+            "derivedSection.interventionBrowseModule.ancestors[*].id",
+            "derivedSection.interventionBrowseModule.meshes[*].id"
+          ]
+        },
+        {
+          "name": "mesh_term",
+          "type": "VARCHAR",
+          "description": null,
+          "pii": false,
+          "inputs": [
+            "source:derivedSection.interventionBrowseModule.ancestors[*].term",
+            "source:derivedSection.interventionBrowseModule.meshes[*].term"
+          ],
+          "sources": [
+            "derivedSection.interventionBrowseModule.ancestors[*].term",
+            "derivedSection.interventionBrowseModule.meshes[*].term"
+          ]
+        },
+        {
+          "name": "relation",
+          "type": "VARCHAR",
+          "description": null,
+          "pii": false,
+          "inputs": [
+            "source:derivedSection.interventionBrowseModule.ancestors[*]",
+            "source:derivedSection.interventionBrowseModule.meshes[*]"
+          ],
+          "sources": [
+            "derivedSection.interventionBrowseModule.ancestors[*]",
+            "derivedSection.interventionBrowseModule.meshes[*]"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "staging.stg_interventions",
+      "layer": "staging",
+      "description": null,
+      "grain": null,
+      "owner": "dsai-data-engineering",
+      "tags": [],
+      "row_count": 9050,
+      "upstream_tables": [],
+      "columns": [
+        {
+          "name": "nct_id",
+          "type": "VARCHAR",
+          "description": null,
+          "pii": false,
+          "inputs": [
+            "source:protocolSection.identificationModule.nctId"
+          ],
+          "sources": [
+            "protocolSection.identificationModule.nctId"
+          ]
+        },
+        {
+          "name": "ordinal",
+          "type": "INTEGER",
+          "description": null,
+          "pii": false,
+          "inputs": [],
+          "sources": []
+        },
+        {
+          "name": "intervention_type",
+          "type": "VARCHAR",
+          "description": null,
+          "pii": false,
+          "inputs": [
+            "source:protocolSection.armsInterventionsModule.interventions[*].type"
+          ],
+          "sources": [
+            "protocolSection.armsInterventionsModule.interventions[*].type"
+          ]
+        },
+        {
+          "name": "intervention_name",
+          "type": "VARCHAR",
+          "description": null,
+          "pii": false,
+          "inputs": [
+            "source:protocolSection.armsInterventionsModule.interventions[*].name"
+          ],
+          "sources": [
+            "protocolSection.armsInterventionsModule.interventions[*].name"
+          ]
+        },
+        {
+          "name": "other_names",
+          "type": "VARCHAR",
+          "description": null,
+          "pii": false,
+          "inputs": [
+            "source:protocolSection.armsInterventionsModule.interventions[*].otherNames"
+          ],
+          "sources": [
+            "protocolSection.armsInterventionsModule.interventions[*].otherNames"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "staging.stg_locations",
+      "layer": "staging",
+      "description": null,
+      "grain": null,
+      "owner": "dsai-data-engineering",
+      "tags": [],
+      "row_count": 60837,
+      "upstream_tables": [],
+      "columns": [
+        {
+          "name": "nct_id",
+          "type": "VARCHAR",
+          "description": null,
+          "pii": false,
+          "inputs": [
+            "source:protocolSection.identificationModule.nctId"
+          ],
+          "sources": [
+            "protocolSection.identificationModule.nctId"
+          ]
+        },
+        {
+          "name": "ordinal",
+          "type": "INTEGER",
+          "description": null,
+          "pii": false,
+          "inputs": [],
+          "sources": []
+        },
+        {
+          "name": "facility",
+          "type": "VARCHAR",
+          "description": null,
+          "pii": false,
+          "inputs": [
+            "source:protocolSection.contactsLocationsModule.locations[*].facility"
+          ],
+          "sources": [
+            "protocolSection.contactsLocationsModule.locations[*].facility"
+          ]
+        },
+        {
+          "name": "city",
+          "type": "VARCHAR",
+          "description": null,
+          "pii": false,
+          "inputs": [
+            "source:protocolSection.contactsLocationsModule.locations[*].city"
+          ],
+          "sources": [
+            "protocolSection.contactsLocationsModule.locations[*].city"
+          ]
+        },
+        {
+          "name": "country",
+          "type": "VARCHAR",
+          "description": null,
+          "pii": false,
+          "inputs": [
+            "source:protocolSection.contactsLocationsModule.locations[*].country"
+          ],
+          "sources": [
+            "protocolSection.contactsLocationsModule.locations[*].country"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "staging.stg_phases",
+      "layer": "staging",
+      "description": null,
+      "grain": null,
+      "owner": "dsai-data-engineering",
+      "tags": [],
+      "row_count": 5582,
+      "upstream_tables": [],
+      "columns": [
+        {
+          "name": "nct_id",
+          "type": "VARCHAR",
+          "description": null,
+          "pii": false,
+          "inputs": [
+            "source:protocolSection.identificationModule.nctId"
+          ],
+          "sources": [
+            "protocolSection.identificationModule.nctId"
+          ]
+        },
+        {
+          "name": "phase",
+          "type": "VARCHAR",
+          "description": null,
+          "pii": false,
+          "inputs": [
+            "source:protocolSection.designModule.phases[*]"
+          ],
+          "sources": [
+            "protocolSection.designModule.phases[*]"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "staging.stg_sponsors",
+      "layer": "staging",
+      "description": null,
+      "grain": null,
+      "owner": "dsai-data-engineering",
+      "tags": [],
+      "row_count": 9423,
+      "upstream_tables": [],
+      "columns": [
+        {
+          "name": "nct_id",
+          "type": "VARCHAR",
+          "description": null,
+          "pii": false,
+          "inputs": [
+            "source:protocolSection.identificationModule.nctId"
+          ],
+          "sources": [
+            "protocolSection.identificationModule.nctId"
+          ]
+        },
+        {
+          "name": "sponsor_name_raw",
+          "type": "VARCHAR",
+          "description": null,
+          "pii": false,
+          "inputs": [
+            "source:protocolSection.sponsorCollaboratorsModule.collaborators[*].name",
+            "source:protocolSection.sponsorCollaboratorsModule.leadSponsor.name"
+          ],
+          "sources": [
+            "protocolSection.sponsorCollaboratorsModule.collaborators[*].name",
+            "protocolSection.sponsorCollaboratorsModule.leadSponsor.name"
+          ]
+        },
+        {
+          "name": "sponsor_class",
+          "type": "VARCHAR",
+          "description": null,
+          "pii": false,
+          "inputs": [
+            "source:protocolSection.sponsorCollaboratorsModule.collaborators[*].class",
+            "source:protocolSection.sponsorCollaboratorsModule.leadSponsor.class"
+          ],
+          "sources": [
+            "protocolSection.sponsorCollaboratorsModule.collaborators[*].class",
+            "protocolSection.sponsorCollaboratorsModule.leadSponsor.class"
+          ]
+        },
+        {
+          "name": "role",
+          "type": "VARCHAR",
+          "description": null,
+          "pii": false,
+          "inputs": [
+            "source:protocolSection.sponsorCollaboratorsModule.collaborators[*]",
+            "source:protocolSection.sponsorCollaboratorsModule.leadSponsor"
+          ],
+          "sources": [
+            "protocolSection.sponsorCollaboratorsModule.collaborators[*]",
+            "protocolSection.sponsorCollaboratorsModule.leadSponsor"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "staging.stg_studies",
+      "layer": "staging",
+      "description": null,
+      "grain": null,
+      "owner": "dsai-data-engineering",
+      "tags": [],
+      "row_count": 5317,
+      "upstream_tables": [],
+      "columns": [
+        {
+          "name": "nct_id",
+          "type": "VARCHAR",
+          "description": null,
+          "pii": false,
+          "inputs": [
+            "source:protocolSection.identificationModule.nctId"
+          ],
+          "sources": [
+            "protocolSection.identificationModule.nctId"
+          ]
+        },
+        {
+          "name": "brief_title",
+          "type": "VARCHAR",
+          "description": null,
+          "pii": false,
+          "inputs": [
+            "source:protocolSection.identificationModule.briefTitle"
+          ],
+          "sources": [
+            "protocolSection.identificationModule.briefTitle"
+          ]
+        },
+        {
+          "name": "overall_status",
+          "type": "VARCHAR",
+          "description": null,
+          "pii": false,
+          "inputs": [
+            "source:protocolSection.statusModule.overallStatus"
+          ],
+          "sources": [
+            "protocolSection.statusModule.overallStatus"
+          ]
+        },
+        {
+          "name": "why_stopped",
+          "type": "VARCHAR",
+          "description": null,
+          "pii": false,
+          "inputs": [
+            "source:protocolSection.statusModule.whyStopped"
+          ],
+          "sources": [
+            "protocolSection.statusModule.whyStopped"
+          ]
+        },
+        {
+          "name": "start_date_raw",
+          "type": "VARCHAR",
+          "description": null,
+          "pii": false,
+          "inputs": [
+            "source:protocolSection.statusModule.startDateStruct.date"
+          ],
+          "sources": [
+            "protocolSection.statusModule.startDateStruct.date"
+          ]
+        },
+        {
+          "name": "start_date_type",
+          "type": "VARCHAR",
+          "description": null,
+          "pii": false,
+          "inputs": [
+            "source:protocolSection.statusModule.startDateStruct.type"
+          ],
+          "sources": [
+            "protocolSection.statusModule.startDateStruct.type"
+          ]
+        },
+        {
+          "name": "primary_completion_date_raw",
+          "type": "VARCHAR",
+          "description": null,
+          "pii": false,
+          "inputs": [
+            "source:protocolSection.statusModule.primaryCompletionDateStruct.date"
+          ],
+          "sources": [
+            "protocolSection.statusModule.primaryCompletionDateStruct.date"
+          ]
+        },
+        {
+          "name": "primary_completion_date_type",
+          "type": "VARCHAR",
+          "description": null,
+          "pii": false,
+          "inputs": [
+            "source:protocolSection.statusModule.primaryCompletionDateStruct.type"
+          ],
+          "sources": [
+            "protocolSection.statusModule.primaryCompletionDateStruct.type"
+          ]
+        },
+        {
+          "name": "first_posted_date_raw",
+          "type": "VARCHAR",
+          "description": null,
+          "pii": false,
+          "inputs": [
+            "source:protocolSection.statusModule.studyFirstPostDateStruct.date"
+          ],
+          "sources": [
+            "protocolSection.statusModule.studyFirstPostDateStruct.date"
+          ]
+        },
+        {
+          "name": "last_update_posted_raw",
+          "type": "VARCHAR",
+          "description": null,
+          "pii": false,
+          "inputs": [
+            "source:protocolSection.statusModule.lastUpdatePostDateStruct.date"
+          ],
+          "sources": [
+            "protocolSection.statusModule.lastUpdatePostDateStruct.date"
+          ]
+        },
+        {
+          "name": "study_type",
+          "type": "VARCHAR",
+          "description": null,
+          "pii": false,
+          "inputs": [
+            "source:protocolSection.designModule.studyType"
+          ],
+          "sources": [
+            "protocolSection.designModule.studyType"
+          ]
+        },
+        {
+          "name": "allocation",
+          "type": "VARCHAR",
+          "description": null,
+          "pii": false,
+          "inputs": [
+            "source:protocolSection.designModule.designInfo.allocation"
+          ],
+          "sources": [
+            "protocolSection.designModule.designInfo.allocation"
+          ]
+        },
+        {
+          "name": "primary_purpose",
+          "type": "VARCHAR",
+          "description": null,
+          "pii": false,
+          "inputs": [
+            "source:protocolSection.designModule.designInfo.primaryPurpose"
+          ],
+          "sources": [
+            "protocolSection.designModule.designInfo.primaryPurpose"
+          ]
+        },
+        {
+          "name": "enrollment_count",
+          "type": "INTEGER",
+          "description": null,
+          "pii": false,
+          "inputs": [
+            "source:protocolSection.designModule.enrollmentInfo.count"
+          ],
+          "sources": [
+            "protocolSection.designModule.enrollmentInfo.count"
+          ]
+        },
+        {
+          "name": "enrollment_type",
+          "type": "VARCHAR",
+          "description": null,
+          "pii": false,
+          "inputs": [
+            "source:protocolSection.designModule.enrollmentInfo.type"
+          ],
+          "sources": [
+            "protocolSection.designModule.enrollmentInfo.type"
+          ]
+        },
+        {
+          "name": "has_results",
+          "type": "BOOLEAN",
+          "description": null,
+          "pii": false,
+          "inputs": [
+            "source:hasResults"
+          ],
+          "sources": [
+            "hasResults"
+          ]
+        },
+        {
+          "name": "brief_summary",
+          "type": "VARCHAR",
+          "description": null,
+          "pii": false,
+          "inputs": [
+            "source:protocolSection.descriptionModule.briefSummary"
+          ],
+          "sources": [
+            "protocolSection.descriptionModule.briefSummary"
+          ]
+        },
+        {
+          "name": "eligibility_criteria",
+          "type": "VARCHAR",
+          "description": null,
+          "pii": false,
+          "inputs": [
+            "source:protocolSection.eligibilityModule.eligibilityCriteria"
+          ],
+          "sources": [
+            "protocolSection.eligibilityModule.eligibilityCriteria"
+          ]
+        },
+        {
+          "name": "minimum_age",
+          "type": "VARCHAR",
+          "description": null,
+          "pii": false,
+          "inputs": [
+            "source:protocolSection.eligibilityModule.minimumAge"
+          ],
+          "sources": [
+            "protocolSection.eligibilityModule.minimumAge"
+          ]
+        },
+        {
+          "name": "sex",
+          "type": "VARCHAR",
+          "description": null,
+          "pii": false,
+          "inputs": [
+            "source:protocolSection.eligibilityModule.sex"
+          ],
+          "sources": [
+            "protocolSection.eligibilityModule.sex"
+          ]
+        },
+        {
+          "name": "batch_id",
+          "type": "VARCHAR",
+          "description": null,
+          "pii": false,
+          "inputs": [],
+          "sources": []
+        },
+        {
+          "name": "ingested_at",
+          "type": "TIMESTAMP",
+          "description": null,
+          "pii": false,
+          "inputs": [],
+          "sources": []
+        }
+      ]
+    }
+  ]
+}

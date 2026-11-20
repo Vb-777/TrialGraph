@@ -1,0 +1,101 @@
+# Data quality checks. severity: error fails the build; warn is reported.
+# Each check names what it protects, because a failing check is only useful
+# if whoever reads it knows what is now wrong downstream.
+
+- table: silver.trial
+  checks:
+    - {type: not_null, column: nct_id, severity: error}
+    - {type: unique, columns: [nct_id], severity: error,
+       why: "two rows per trial would double every count"}
+    - {type: regex, column: nct_id, pattern: '^NCT[0-9]{8}$', severity: error}
+    - {type: accepted_values, column: overall_status, severity: warn,
+       values: [ACTIVE_NOT_RECRUITING, COMPLETED, ENROLLING_BY_INVITATION, NOT_YET_RECRUITING,
+                RECRUITING, SUSPENDED, TERMINATED, WITHDRAWN, AVAILABLE, NO_LONGER_AVAILABLE,
+                TEMPORARILY_NOT_AVAILABLE, APPROVED_FOR_MARKETING, WITHHELD, UNKNOWN],
+       why: "an unrecognised status is excluded from every status-based metric"}
+    - {type: expression, name: start_date_parses, severity: warn,
+       sql: "start_date_raw IS NULL OR start_date IS NOT NULL",
+       why: "a date present in the source but unparsed silently drops out of time series"}
+    - {type: expression, name: enrollment_non_negative, severity: error,
+       sql: "enrollment_count IS NULL OR enrollment_count >= 0"}
+    - {type: expression, name: completion_not_before_start, severity: warn,
+       sql: "primary_completion_date IS NULL OR start_date IS NULL OR primary_completion_date >= start_date",
+       why: "completion before start is a data-entry error in the registry"}
+    - {type: expression, name: enrollment_type_consistent, severity: error,
+       sql: "NOT (enrollment_actual IS NOT NULL AND enrollment_planned IS NOT NULL)",
+       why: "actual and planned enrollment must never both be set, or totals mix them"}
+
+- table: gold.fct_trial
+  checks:
+    - {type: unique, columns: [nct_id], severity: error}
+    - {type: not_null, column: lead_sponsor_key, severity: warn}
+    - {type: relationship, column: lead_sponsor_key, to: gold.dim_sponsor.sponsor_key, severity: error,
+       why: "an orphan sponsor key drops the trial from every sponsor breakdown"}
+    - {type: accepted_values, column: status_group, values: [ongoing, completed, stopped, unknown], severity: error}
+    - {type: expression, name: enrollment_population_scale, severity: warn,
+       sql: "enrollment_actual IS NULL OR enrollment_actual < 100000",
+       why: "population-scale pragmatic trials are legitimate but dominate any total - report medians beside sums"}
+
+- table: gold.fct_trial
+  checks:
+    - {type: expression, name: has_mesh_condition, severity: warn,
+       sql: "nct_id IN (SELECT nct_id FROM gold.brg_trial_condition)",
+       why: "a trial with no MeSH mapping is invisible to every hierarchy-based question; use condition_text too"}
+
+- table: gold.brg_trial_condition
+  checks:
+    - {type: unique, columns: [nct_id, mesh_id], severity: error}
+    - {type: relationship, column: nct_id, to: gold.fct_trial.nct_id, severity: error}
+    - {type: relationship, column: mesh_id, to: gold.dim_condition.mesh_id, severity: error}
+
+- table: gold.brg_trial_intervention
+  checks:
+    - {type: relationship, column: nct_id, to: gold.fct_trial.nct_id, severity: error}
+    - {type: relationship, column: intervention_key, to: gold.dim_intervention.intervention_key, severity: error}
+
+- table: gold.brg_trial_sponsor
+  checks:
+    - {type: relationship, column: nct_id, to: gold.fct_trial.nct_id, severity: error}
+    - {type: relationship, column: sponsor_key, to: gold.dim_sponsor.sponsor_key, severity: error}
+    - {type: accepted_values, column: role, values: [lead, collaborator], severity: error}
+
+- table: gold.brg_trial_country
+  checks:
+    - {type: unique, columns: [nct_id, country], severity: error}
+    - {type: relationship, column: nct_id, to: gold.fct_trial.nct_id, severity: error}
+
+- table: gold.brg_trial_condition_text
+  checks:
+    - {type: relationship, column: nct_id, to: gold.fct_trial.nct_id, severity: error}
+
+- table: gold.dim_intervention
+  checks:
+    - {type: unique, columns: [intervention_key], severity: error}
+    - {type: expression, name: no_runaway_synonym_group, severity: warn,
+       sql: "synonym_count <= 50",
+       why: "a very large synonym group is the signature of an over-merge"}
+
+- table: gold.rag_chunks
+  checks:
+    - {type: unique, columns: [chunk_id], severity: error,
+       why: "chunk_id is the citation handle; it must identify exactly one chunk"}
+    - {type: relationship, column: nct_id, to: gold.fct_trial.nct_id, severity: error}
+
+# Cross-layer checks
+- reconcile:
+    name: bronze_to_silver_trials
+    severity: error
+    left: "SELECT count(DISTINCT nct_id) FROM bronze.raw_studies"
+    right: "SELECT count(*) FROM silver.trial"
+    why: "every keyed bronze trial must appear exactly once in silver"
+- reconcile:
+    name: silver_to_gold_trials
+    severity: error
+    left: "SELECT count(*) FROM silver.trial"
+    right: "SELECT count(*) FROM gold.fct_trial"
+- governance: pii_lineage
+  severity: error
+  why: "no gold column may derive its value from personal data"
+- governance: gold_documented
+  severity: error
+  why: "every gold column must carry a description in catalog.yml"

@@ -1,0 +1,12 @@
+__pycache__/
+*.pyc
+.pytest_cache/
+*.duckdb
+*.duckdb.wal
+out/
+.databricks/
+# raw registry exports are large; fetch them (see README)
+data/raw/
+.venv/
+*.egg-info/
+*.py[cod]

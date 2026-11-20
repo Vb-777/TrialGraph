@@ -1,0 +1,39 @@
+# Databricks Asset Bundle for TrialGraph.
+# UNTESTED ON DATABRICKS: written against the documented bundle schema, not run.
+# Deploy:  databricks bundle validate && databricks bundle deploy -t dev && databricks bundle run trialgraph_build -t dev
+bundle:
+  name: trialgraph
+
+variables:
+  catalog:
+    description: Unity Catalog catalog to build into
+    default: main
+  raw_path:
+    description: ClinicalTrials.gov JSON export uploaded to a UC volume
+    default: /Volumes/main/trialgraph/raw/ctg-studies.json
+
+resources:
+  jobs:
+    trialgraph_build:
+      name: trialgraph-build
+      tasks:
+        - task_key: build
+          notebook_task:
+            notebook_path: ./databricks/build_notebook.py
+            base_parameters:
+              catalog: ${var.catalog}
+              raw_path: ${var.raw_path}
+          environment_key: default
+      environments:
+        - environment_key: default
+          spec:
+            client: "2"
+            dependencies:
+              - duckdb>=2.0
+              - sqlglot>=30
+              - pyyaml>=6
+
+targets:
+  dev:
+    mode: development
+    default: true

@@ -1,0 +1,514 @@
+{
+  "summary": {
+    "agreement": {
+      "pass": 14,
+      "fail": 0
+    },
+    "resolution": {
+      "pass": 5,
+      "fail": 0
+    },
+    "grounding": {
+      "pass": 6,
+      "fail": 0
+    },
+    "abstention": {
+      "pass": 7,
+      "fail": 0
+    },
+    "retrieval": {
+      "pass": 1,
+      "fail": 0
+    }
+  },
+  "cases": [
+    {
+      "id": "total_trials",
+      "category": "agreement",
+      "expected": 5317,
+      "got": 5317,
+      "pass": true,
+      "note": null
+    },
+    {
+      "id": "trials_by_status",
+      "category": "agreement",
+      "expected": {
+        "COMPLETED": 2639,
+        "NOT_YET_RECRUITING": 258,
+        "ENROLLING_BY_INVITATION": 44,
+        "ACTIVE_NOT_RECRUITING": 179,
+        "TERMINATED": 461,
+        "UNKNOWN": 826,
+        "WITHDRAWN": 243,
+        "SUSPENDED": 21,
+        "RECRUITING": 646
+      },
+      "got": {
+        "COMPLETED": 2639,
+        "UNKNOWN": 826,
+        "RECRUITING": 646,
+        "TERMINATED": 461,
+        "NOT_YET_RECRUITING": 258,
+        "WITHDRAWN": 243,
+        "ACTIVE_NOT_RECRUITING": 179,
+        "ENROLLING_BY_INVITATION": 44,
+        "SUSPENDED": 21
+      },
+      "pass": true,
+      "note": null
+    },
+    {
+      "id": "trials_by_phase",
+      "category": "agreement",
+      "expected": {
+        "NA": 3038,
+        "EARLY_PHASE1": 55,
+        "PHASE1": 253,
+        "PHASE3": 497,
+        "PHASE2": 561,
+        "PHASE4": 648,
+        "PHASE2/PHASE3": 126,
+        "PHASE1/PHASE2": 139
+      },
+      "got": {
+        "NA": 3038,
+        "PHASE4": 648,
+        "PHASE2": 561,
+        "PHASE3": 497,
+        "PHASE1": 253,
+        "PHASE1/PHASE2": 139,
+        "PHASE2/PHASE3": 126,
+        "EARLY_PHASE1": 55
+      },
+      "pass": true,
+      "note": null
+    },
+    {
+      "id": "trials_by_start_year",
+      "category": "agreement",
+      "expected": {
+        "2011": 211,
+        "2020": 244,
+        "2024": 338,
+        "2022": 272,
+        "2017": 267,
+        "2026": 353,
+        "2025": 312,
+        "2018": 268,
+        "2023": 307,
+        "2006": 111,
+        "2014": 220,
+        "2001": 29,
+        "2010": 175,
+        "2013": 213,
+        "2012": 180,
+        "2009": 167,
+        "2016": 243,
+        "2008": 142,
+        "2004": 86,
+        "2003": 75,
+        "2005": 101,
+        "2007": 149,
+        "2000": 10,
+        "2021": 293,
+        "1998": 6,
+        "2019": 244,
+        "2015": 167,
+        "1994": 3,
+        "1999": 11,
+        "null": 30,
+        "2002": 39,
+        "2027": 33,
+        "1996": 3,
+        "1997": 8,
+        "2028": 1,
+        "1993": 2,
+        "1990": 2,
+        "1982": 1,
+        "1985": 1
+      },
+      "got": {
+        "2026": 353,
+        "2024": 338,
+        "2025": 312,
+        "2023": 307,
+        "2021": 293,
+        "2022": 272,
+        "2018": 268,
+        "2017": 267,
+        "2019": 244,
+        "2020": 244,
+        "2016": 243,
+        "2014": 220,
+        "2013": 213,
+        "2011": 211,
+        "2012": 180,
+        "2010": 175,
+        "2009": 167,
+        "2015": 167,
+        "2007": 149,
+        "2008": 142,
+        "2006": 111,
+        "2005": 101,
+        "2004": 86,
+        "2003": 75,
+        "2002": 39,
+        "2027": 33,
+        "null": 30,
+        "2001": 29,
+        "1999": 11,
+        "2000": 10,
+        "1997": 8,
+        "1998": 6,
+        "1994": 3,
+        "1996": 3,
+        "1990": 2,
+        "1993": 2,
+        "1982": 1,
+        "1985": 1,
+        "2028": 1
+      },
+      "pass": true,
+      "note": null
+    },
+    {
+      "id": "results_reporting_rate",
+      "category": "agreement",
+      "expected": 0.2694202349374763,
+      "got": 0.2694202349374763,
+      "pass": true,
+      "note": null
+    },
+    {
+      "id": "termination_rate",
+      "category": "agreement",
+      "expected": 0.14870967741935484,
+      "got": 0.14870967741935484,
+      "pass": true,
+      "note": null
+    },
+    {
+      "id": "enrollment_hf_area",
+      "category": "agreement",
+      "expected": {
+        "trials": 3968,
+        "actual_enrollment": 4742128,
+        "planned_enrollment": 589375
+      },
+      "got": {
+        "trials": 3968,
+        "actual_enrollment": 4742128,
+        "planned_enrollment": 589375
+      },
+      "pass": true,
+      "note": null
+    },
+    {
+      "id": "enrollment_hf_direct_fanout",
+      "category": "agreement",
+      "expected": {
+        "trials": 3929,
+        "actual_enrollment": 4739436,
+        "planned_enrollment": 587705
+      },
+      "got": {
+        "trials": 3929,
+        "actual_enrollment": 4739436,
+        "planned_enrollment": 587705
+      },
+      "pass": true,
+      "note": {
+        "naive_join_result": {
+          "trials": 3929,
+          "actual_enrollment": 4762917,
+          "planned_enrollment": 622513
+        }
+      }
+    },
+    {
+      "id": "trials_in_United_States",
+      "category": "agreement",
+      "expected": 1916,
+      "got": 1916,
+      "pass": true,
+      "note": null
+    },
+    {
+      "id": "trials_in_Germany",
+      "category": "agreement",
+      "expected": 481,
+      "got": 481,
+      "pass": true,
+      "note": null
+    },
+    {
+      "id": "trials_in_Canada",
+      "category": "agreement",
+      "expected": 445,
+      "got": 445,
+      "pass": true,
+      "note": null
+    },
+    {
+      "id": "trials_in_United_Kingdom",
+      "category": "agreement",
+      "expected": 388,
+      "got": 388,
+      "pass": true,
+      "note": null
+    },
+    {
+      "id": "trials_in_Italy",
+      "category": "agreement",
+      "expected": 372,
+      "got": 372,
+      "pass": true,
+      "note": null
+    },
+    {
+      "id": "novartis_group_lead_trials",
+      "category": "agreement",
+      "expected": 63,
+      "got": 63,
+      "pass": true,
+      "note": "reference: lead sponsor text mentions Novartis, which also catches '... a member of the Novartis group of companies'"
+    },
+    {
+      "id": "resolve_Sacubitril/Valsartan",
+      "category": "resolution",
+      "expected": 94,
+      "got": 83,
+      "pass": true,
+      "note": {
+        "precision": 1.0,
+        "recall": 0.883,
+        "missed_examples": [
+          "NCT03168568",
+          "NCT03190304",
+          "NCT03300427",
+          "NCT03506412",
+          "NCT04153136"
+        ],
+        "extra_examples": []
+      }
+    },
+    {
+      "id": "resolve_Dapagliflozin",
+      "category": "resolution",
+      "expected": 85,
+      "got": 74,
+      "pass": true,
+      "note": {
+        "precision": 1.0,
+        "recall": 0.8706,
+        "missed_examples": [
+          "NCT04778787",
+          "NCT04882358",
+          "NCT05965934",
+          "NCT06091475",
+          "NCT06142474"
+        ],
+        "extra_examples": []
+      }
+    },
+    {
+      "id": "resolve_Empagliflozin",
+      "category": "resolution",
+      "expected": 80,
+      "got": 66,
+      "pass": true,
+      "note": {
+        "precision": 1.0,
+        "recall": 0.825,
+        "missed_examples": [
+          "NCT03271879",
+          "NCT04535960",
+          "NCT05129722",
+          "NCT05138575",
+          "NCT05687058"
+        ],
+        "extra_examples": []
+      }
+    },
+    {
+      "id": "resolve_Spironolactone",
+      "category": "resolution",
+      "expected": 61,
+      "got": 43,
+      "pass": true,
+      "note": {
+        "precision": 1.0,
+        "recall": 0.7049,
+        "missed_examples": [
+          "NCT00292162",
+          "NCT00527059",
+          "NCT00663195",
+          "NCT00664222",
+          "NCT00773084"
+        ],
+        "extra_examples": []
+      }
+    },
+    {
+      "id": "resolve_Furosemide",
+      "category": "resolution",
+      "expected": 105,
+      "got": 58,
+      "pass": true,
+      "note": {
+        "precision": 1.0,
+        "recall": 0.5524,
+        "missed_examples": [
+          "NCT00175227",
+          "NCT00577135",
+          "NCT00652652",
+          "NCT00663195",
+          "NCT00664222"
+        ],
+        "extra_examples": []
+      }
+    },
+    {
+      "id": "grounded:{'status': 'RECRUITING', 'phase': 'PHASE3'}",
+      "category": "grounding",
+      "expected": 0,
+      "got": 0,
+      "pass": true,
+      "note": {
+        "cited": 50,
+        "total": 52,
+        "violations": []
+      }
+    },
+    {
+      "id": "grounded:{'condition': 'Heart Failure', 'status': 'TERMINATED'}",
+      "category": "grounding",
+      "expected": 0,
+      "got": 0,
+      "pass": true,
+      "note": {
+        "cited": 50,
+        "total": 354,
+        "violations": []
+      }
+    },
+    {
+      "id": "grounded:{'intervention': 'Sacubitril/Valsartan'}",
+      "category": "grounding",
+      "expected": 0,
+      "got": 0,
+      "pass": true,
+      "note": {
+        "cited": 50,
+        "total": 83,
+        "violations": []
+      }
+    },
+    {
+      "id": "grounded:{'country': 'India', 'phase': 'PHASE4'}",
+      "category": "grounding",
+      "expected": 0,
+      "got": 0,
+      "pass": true,
+      "note": {
+        "cited": 7,
+        "total": 7,
+        "violations": []
+      }
+    },
+    {
+      "id": "grounded:{'sponsor_class': 'INDUSTRY', 'status_group': 'stopped'}",
+      "category": "grounding",
+      "expected": 0,
+      "got": 0,
+      "pass": true,
+      "note": {
+        "cited": 50,
+        "total": 238,
+        "violations": []
+      }
+    },
+    {
+      "id": "grounded:{'start_year': 2020, 'has_results': True}",
+      "category": "grounding",
+      "expected": 0,
+      "got": 0,
+      "pass": true,
+      "note": {
+        "cited": 46,
+        "total": 46,
+        "violations": []
+      }
+    },
+    {
+      "id": "abstain:resolve_intervention:Notarealumab",
+      "category": "abstention",
+      "expected": "not_found",
+      "got": "not_found",
+      "pass": true,
+      "note": null
+    },
+    {
+      "id": "abstain:resolve_intervention:sacubitri",
+      "category": "abstention",
+      "expected": "not_found",
+      "got": "not_found",
+      "pass": true,
+      "note": null
+    },
+    {
+      "id": "abstain:resolve_sponsor:Acme Imaginary Pharma",
+      "category": "abstention",
+      "expected": "not_found",
+      "got": "not_found",
+      "pass": true,
+      "note": null
+    },
+    {
+      "id": "abstain:get_trial:NCT99999999",
+      "category": "abstention",
+      "expected": "not_found",
+      "got": "not_found",
+      "pass": true,
+      "note": null
+    },
+    {
+      "id": "abstain:get_trial:heart failure",
+      "category": "abstention",
+      "expected": "error",
+      "got": "error",
+      "pass": true,
+      "note": null
+    },
+    {
+      "id": "abstain:metric:trials",
+      "category": "abstention",
+      "expected": "error",
+      "got": "error",
+      "pass": true,
+      "note": null
+    },
+    {
+      "id": "abstain:metric:made_up_metric",
+      "category": "abstention",
+      "expected": "error",
+      "got": "error",
+      "pass": true,
+      "note": null
+    },
+    {
+      "id": "known_item_retrieval",
+      "category": "retrieval",
+      "expected": null,
+      "got": {
+        "hit@1": 0.56,
+        "hit@5": 0.72,
+        "mrr": 0.631,
+        "n": 100
+      },
+      "pass": true,
+      "note": null
+    }
+  ]
+}

@@ -1,0 +1,33 @@
+@prefix sh:   <http://www.w3.org/ns/shacl#> .
+@prefix tg:   <https://github.com/Vb-777/TrialGraph/ontology#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd:  <http://www.w3.org/2001/XMLSchema#> .
+
+tg:TrialShape a sh:NodeShape ;
+    sh:targetClass tg:ClinicalTrial ;
+    sh:property [ sh:path tg:nctId ; sh:minCount 1 ; sh:maxCount 1 ;
+                  sh:datatype xsd:string ; sh:pattern "^NCT[0-9]{8}$" ] ;
+    sh:property [ sh:path tg:hasStatus ; sh:minCount 1 ; sh:maxCount 1 ; sh:class tg:Status ] ;
+    sh:property [ sh:path tg:inPhase ; sh:maxCount 1 ; sh:class tg:Phase ] ;
+    sh:property [ sh:path tg:hasLeadSponsor ; sh:maxCount 1 ; sh:class tg:Organization ] ;
+    sh:property [ sh:path tg:actualEnrollment ; sh:maxCount 1 ; sh:datatype xsd:integer ; sh:minInclusive 0 ] ;
+    sh:property [ sh:path tg:plannedEnrollment ; sh:maxCount 1 ; sh:datatype xsd:integer ; sh:minInclusive 0 ] ;
+    sh:property [ sh:path tg:studiesCondition ; sh:class tg:Condition ] ;
+    # A trial reports actual or planned enrollment, never both - the same rule
+    # the warehouse enforces, restated where a graph consumer will see it.
+    sh:not [ sh:and (
+        [ sh:path tg:actualEnrollment ; sh:minCount 1 ]
+        [ sh:path tg:plannedEnrollment ; sh:minCount 1 ] ) ] .
+
+tg:ConditionShape a sh:NodeShape ;
+    sh:targetClass tg:Condition ;
+    # D = MeSH descriptor; C = Supplementary Concept Record, which the registry
+    # uses for rare conditions. An earlier version allowed only D and flagged 17
+    # real conditions as invalid - the shape was wrong, not the data.
+    sh:pattern "^http://id\\.nlm\\.nih\\.gov/mesh/[DC][0-9]+$" ;
+    sh:property [ sh:path skos:prefLabel ; sh:minCount 1 ; sh:maxCount 1 ] .
+
+tg:OrganizationShape a sh:NodeShape ;
+    sh:targetClass tg:Organization ;
+    sh:property [ sh:path rdfs:label ; sh:minCount 1 ; sh:maxCount 1 ] .

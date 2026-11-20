@@ -1,0 +1,36 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "trialgraph"
+version = "0.1.0"
+description = "AI-ready clinical-trials data foundation: medallion warehouse, entity resolution, quality gates, lineage, semantic layer, ontology and a grounded tool contract over ClinicalTrials.gov"
+readme = "README.md"
+license = {text = "MIT"}
+requires-python = ">=3.11"
+# Floors are the versions this was built and tested with.
+dependencies = [
+    "duckdb>=2.0",
+    "sqlglot>=30",
+    "pyyaml>=6",
+    "rdflib>=7",
+    "pyshacl>=0.40",
+]
+
+[project.optional-dependencies]
+api = ["requests>=2.31"]          # fetching from the ClinicalTrials.gov v2 API
+dev = ["pytest>=8"]
+
+[project.scripts]
+trialgraph = "trialgraph.__main__:main"
+
+[tool.setuptools.packages.find]
+include = ["trialgraph*"]
+
+[tool.setuptools.package-data]
+trialgraph = ["config/*", "models/*/*.sql"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["tests"]
